@@ -299,8 +299,12 @@ The vapor pressure of the mixture is calculated according to Raoult's law:
    p_{v} = \sum_{i = 1}^{N_c} X_i \, p_{\textit{sat},i}.
    \end{align*}
 
-Validation: Single Component Fuels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Validation
+----------
+
+Single Component Fuels
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: /figures/mixtureProps-decane.png
    :width: 600pt
@@ -316,8 +320,8 @@ Validation: Single Component Fuels
    
 Properties of decane, dodecane, and heptane.  Data from NIST Chemistry WebBook.
 
-Validation: Multi-Component Fuels
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Multi-Component Fuels
+^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: /figures/mixtureProps-posf10325.png
    :width: 600pt
