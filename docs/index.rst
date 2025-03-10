@@ -7,8 +7,8 @@ Gani\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995` in the mi
 with additions from Govindaraju and Ihme (2016)\ :footcite:p:`govindaraju_group_2016`, 
 to provide a systematic approach for estimating the thermodynamic properties of
 pure organic compounds. If you need help or have questions, please use the 
-`GitHub discussion <https://github.com/dmontgomeryNREL/FuelLib/discussions>`_.
-The source code is available at `github.com/dmontgomeryNREL/FuelLib <https://github.com/dmontgomeryNREL/FuelLib>`_.
+`GitHub discussion <https://github.com/NREL/FuelLib/discussions>`_.
+The source code is available at `github.com/NREL/FuelLib <https://github.com/NREL/FuelLib>`_.
 
 .. toctree::
    :maxdepth: 4
