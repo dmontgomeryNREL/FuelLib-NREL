@@ -11,6 +11,7 @@ The following GCxGC data comes from the Air Force Research Laboratory [Edwards (
 
 # Group Decomposition Data
 The decompositions of each compound into its functional groups for the posf related data originated from [Govindaraju & Ihme (2016)](https://doi.org/10.1016/j.ijheatmasstransfer.2016.06.079), but has been updated for additional accuracy:
+* groupDecompositionData/posf4658.xlsx
 * groupDecompositionData/posf10264.xlsx
 * groupDecompositionData/posf10289.xlsx
 * groupDecompositionData/posf10325.xlsx
