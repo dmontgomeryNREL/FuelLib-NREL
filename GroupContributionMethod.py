@@ -62,18 +62,21 @@ class groupContribution:
     Cp_C   = None
     Lv_stp = None
     
-    def __init__(self, name="", W = 1):
+    def __init__(self, name, decompName=None, W = 1):
         """
         Initializes mixture-specific data and GCM properties for the specified 
         mixture. Reads GCM table and mixture data from files.
         
         Parameters:
-        name (str): Name of the fuel and associated GCxGC and decomposition data.
-        W (int): Determines if first-order only approximation (i.e. W = 0) 
+        name (str): Name of the mixture as it appears in its gcData file.
+        decompName (str, optional): Name of the groupDecomposition file if different from name.
+        W (int, optional): Determines if first-order only approximation (i.e. W = 0) 
         """
 
         self.name = name
-        groupDecompFile = os.path.join(self.groupDecompDir, f"{name}.xlsx")
+        if decompName is None:
+            decompName = name
+        groupDecompFile = os.path.join(self.groupDecompDir, f"{decompName}.xlsx")
         gcxgcFile = os.path.join(self.gcxgcDir, f"{name}_init.xlsx")
 
         # Read functional group data for mixture (num_compounds,num_groups)
@@ -181,7 +184,7 @@ class groupContribution:
 
         # Lennard-Jones parameters for diffusion calculations (Tee et al. 1966)
         self.epsilon = (0.7915 + 0.1693 * self.omega) * self.Tc * self.k_B # K
-        Pc_atm = self.Pc/101300 # atm
+        Pc_atm = self.Pc/101325 # atm
         self.sigma = (2.3551 - 0.0874 * self.omega) * (self.Tc / Pc_atm)**(1./3) # Angstroms
         self.sigma *= 1e-10 # m
 
@@ -257,6 +260,7 @@ class groupContribution:
         Returns:
         np.array: Viscosity of each component in m^2/s.
         """
+
         # Convert temperature to Celsius
         T_cels = K2C(T)  
         Tb_cels = K2C(self.Tb)
