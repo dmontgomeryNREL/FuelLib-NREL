@@ -183,10 +183,10 @@ class groupContribution:
         self.Lv_stp = self.Hv_stp / self.MW # J/kg
 
         # Lennard-Jones parameters for diffusion calculations (Tee et al. 1966)
-        self.epsilon = (0.7915 + 0.1693 * self.omega) * self.Tc * self.k_B # K
+        self.epsilonByKB = (0.7915 + 0.1693 * self.omega) * self.Tc # K
         Pc_atm = self.Pc/101325 # atm
         self.sigma = (2.3551 - 0.0874 * self.omega) * (self.Tc / Pc_atm)**(1./3) # Angstroms
-        self.sigma *= 1e-10 # m
+        self.sigma *= 1e-10 # Convert from Angstroms to m
 
         
     # -------------------------------------------------------------------------
@@ -395,26 +395,43 @@ class groupContribution:
         
         return Lvi
     
-    def diffusion_coeff(self, p, T, sigma_gas = 3.62e-10, epsilon_gas = 97.0, MW_gas = 28.97e-3):
+    def diffusion_coeff(self, p, T, sigma_gas = 3.62e-10, epsilonByKB_gas = 97.0, MW_gas = 28.97e-3, correlation='Tee'):
         """
         Computes the diffusion coefficient using Lennard-Jones parameters according
-        to Wilke and Lee.  See equation 11-4.1 in Poling.
+        to Wilke and Lee.  See equation (11-4.1) in Poling. Assumes ambient gas is air
+        with values from Poling (see end of Section 11-4.1).
 
         Parameters:
         p (float): Pressure in Pa.
         T (float): Temperature in Kelvin.
         sigma_gas (float, optional): collision diameter (m), default is air
-        epsilon_gas (float, optional): well depth (J), default is air
+        epsilonByKB_gas (float, optional): (well depth) / (Boltzmann_const) (K), default is air
         MW_gas (float, optional): Mean molecular weight of gas (kg/mol), default is air
+        correlation (str, optional): Method for calculating sigma and epsilonByKB
 
         Returns:
         D_AB (np.ndarray): Diffusion coefficient (num_compounds,).
-        """		
-
-        sigmaAB = (sigma_gas + self.sigma) / 2 # m
-        sigmaAB *= 1e+10 # Convert to Å
-        epsilonAB = (self.epsilon * epsilon_gas) ** 0.5 # J
-        Tstar = self.k_B * T / epsilonAB
+        """
+        
+        # Method of Tee for calculating liquid sigma and epsilon
+        if correlation.casefold() == 'Tee'.casefold():
+            sigma_i = self.sigma * 1e10 # convert from m to Angstroms
+            epsilonByKB_i = self.epsilonByKB # K
+        else:
+            # Method of Wilke & Lee calculating liquid sigma and epsilon
+            Vmb_i = np.zeros_like(self.Tb)
+            for n in range(self.num_compounds):
+                Vmb_i[n] = self.molar_liquid_vol(self.Tb[n])[n] * 1e6 # cm^3/mol
+            sigma_i = 1.18 * Vmb_i ** (1/3) # Angstroms, Poling (11-4.2)
+            epsilonByKB_i = 1.15*self.Tb # K , Poling (11-4.3)
+        
+        # Compute binary sigma and epsilon
+        sigma_gas *= 1e10 # convert from m to Angstroms
+        sigmaAB_i = (sigma_gas + sigma_i) / 2 # Angstroms, Poling (11-3.5)
+        epsilonAB_byKB_i = (epsilonByKB_gas * epsilonByKB_i) ** 0.5 # K, Poling (11-3.4)
+        
+        # Dimensionless collision integral for diffusion: Poling (11-3.6)
+        Tstar_i =  T / epsilonAB_byKB_i # [1]
         A = 1.06036
         B = 0.15610
         C = 0.193
@@ -423,21 +440,22 @@ class groupContribution:
         F = 1.52996
         G = 1.76474
         H = 3.89411
-
-        omegaD = A / (Tstar ** B) + C / np.exp(D * Tstar) + E / np.exp(F * Tstar) + G / np.exp(H * Tstar)
+        omegaD_i = A / (Tstar_i ** B) + C / np.exp(D * Tstar_i) + \
+                   E / np.exp(F * Tstar_i) + G / np.exp(H * Tstar_i)
 
         # Convert molecular weights from kg/mol to g/mol then calcualte M_AB
         MW_gas *= 1e3 
-        MW_mix = self.MW * 1e3
-        M_AB = 2 * (MW_mix * MW_gas) / (MW_mix + MW_gas)
+        MW_i = self.MW * 1e3 
+        M_AB_i = 2 * (MW_i * MW_gas) / (MW_i + MW_gas) # g/mol, see Poling (11-3.1) 
 
         # Convert pressure from Pa to bar
         p *= 1e-5 # bar
 
-        D_AB = 1e-3 * (3.03 - 0.98 / (M_AB**0.5)) * (T**1.5) / (p * M_AB**0.5 * sigmaAB**2 * omegaD) # cm^2/s
-        D_AB *= 1e-4 # Convert to m^2/s
+        # Binary diffusion coefficients, Poling (11-4.1)
+        D_AB_i = 1e-3 * (3.03 - 0.98 / (M_AB_i**0.5)) * (T**1.5) / (p * M_AB_i**0.5 * sigmaAB_i**2 * omegaD_i) # cm^2/s
+        D_AB_i *= 1e-4 # Convert to m^2/s
 
-        return D_AB
+        return D_AB_i
     
     def mixture_density(self, Yi, T):
         """
