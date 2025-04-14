@@ -54,7 +54,18 @@ Table of GCM properties
 Equations for GCM properties
 ----------------------------
 
-The properties of each compound in a mixture can be calculated as the sum of contributions from the first- and second-order groups that make up the compound. For a given mixture, let :math:`\mathbf{N}` be an :math:`N_c \times N_{g_1}` matrix that represents the number of first-order groups in each compound, where $N_c$ is the number of compounds in the mixture and :math:`N_{g_1}` is the total number of first-order groups as defined by Constantinou and Gani\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995`.  Similarly, let :math:`\mathbf{M}` be an :math:`N_c \times N_{g_2}` matrix that specifies the number of second-order groups in each compound, where :math:`N_{g_2}` is the total number of second-order groups. The total number of groups :math:`N_g = N_{g_1} + N_{g_2} = 121`. Define a parameter :math:`W` such that :math:`W = 0` performs a first-order group only calculation, while :math:`W = 1` includes second-order groups. The GCM properties for the *i-th* compound in the mixture are calculated as follows\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995,poling_properties_2001`:
+The properties of each compound in a mixture can be calculated as the sum of contributions 
+from the first- and second-order groups that make up the compound. For a given mixture, 
+let :math:`\mathbf{N}` be an :math:`N_c \times N_{g_1}` matrix that represents the 
+number of first-order groups in each compound, where :math:`N_c` is the number of compounds 
+in the mixture and :math:`N_{g_1}` is the total number of first-order groups as defined 
+by Constantinou and Gani\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995`.  
+Similarly, let :math:`\mathbf{M}` be an :math:`N_c \times N_{g_2}` matrix that specifies 
+the number of second-order groups in each compound, where :math:`N_{g_2}` is the total 
+number of second-order groups. The total number of groups :math:`N_g = N_{g_1} + N_{g_2} = 121`. 
+Define a parameter :math:`W` such that :math:`W = 0` performs a first-order group only 
+calculation, while :math:`W = 1` includes second-order groups. The GCM properties for 
+the *i-th* compound in the mixture are calculated as follows\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995,poling_properties_2001`:
 
 .. math::
 
@@ -81,7 +92,14 @@ The properties of each compound in a mixture can be calculated as the sum of con
 Equations for individual compound correlations
 ----------------------------------------------
 
-This section presents correlations for physical properties that leverage the individual compound properties defined in :ref:`eq-GCM-properties`.  These correlations make it possible to evaluate physical properties at non-standard temperatures and pressures, given that group contribution properties are only defined at standard conditions. The :ref:`tab-dimensionless-qtys` are used throughout this section for each compound *i*, provided :math:`T` in :math:`^{\circ}` K unless noted otherwise.
+This section presents correlations for physical properties that leverage the individual 
+compound properties defined in :ref:`eq-GCM-properties`.  These correlations make 
+it possible to evaluate physical properties at non-standard temperatures and pressures, 
+given that group contribution properties are only defined at standard conditions.
+Unless noted otherwise in the individual correlation, all units are assumed to be SI: 
+length (m), mass (kg), time (s), temperature (K), mole (mol).
+The :ref:`tab-reduced-temps` are used throughout this section for each compound *i*, 
+provided :math:`T` in :math:`^{\circ}` K unless noted otherwise.
 
 .. _tab-correlation-qtys:
 
@@ -98,10 +116,12 @@ This section presents correlations for physical properties that leverage the ind
    :math:`V_{m,i}`                m\ :sup:`3`\ /mol      Temperature-adjusted liquid molar volume\ :footcite:p:`rackett_equation_1970,yamada_saturated_1973,govindaraju_group_2016`.
    :math:`C_{\ell,i}`             J/kg/K                 Liquid specific heat capacity\ :footcite:p:`govindaraju_group_2016`. 
    :math:`p_{sat,i}`              Pa                     Saturated vapor pressure\ :footcite:p:`lee_generalized_1975,ambrose_vapour_1989`.
+   :math:`\sigma_i`               N/m                    Surface tension\ :footcite:p:`brock_surface_1955`.
+   :math:`\lambda_i`              W/m/K                  Thermal conductivity\ :footcite:p:`poling_properties_2001`.
    =============================  =====================  ===============================================================
 
 
-.. _tab-dimensionless-qtys:
+.. _tab-reduced-temps:
 
 .. table:: Reduced temperature quantities
    :widths: auto
@@ -111,8 +131,8 @@ This section presents correlations for physical properties that leverage the ind
    Symbol                         Definition                                 Description
    =============================  =========================================  ======================================================
    :math:`T_{r,i}`                :math:`\frac{T}{T_{c,i}}`                  Reduced temperature.
-   :math:`T_{r,b,i}`              :math:`\frac{T}{T_{b,i}}`                  Reduced temperature relative to normal boiling point.
-   :math:`T_{r,\textit{stp},i}`   :math:`\frac{298 \text{ (K)}}{T_{c,i}}`    Reduced temperature relative to standard temperature.
+   :math:`T_{r,b,i}`              :math:`\frac{T_{b,i}}{T_{c,i}}`            Reduced boiling point temperature.
+   :math:`T_{r,\textit{stp},i}`   :math:`\frac{298 \text{ (K)}}{T_{c,i}}`    Reduced standard temperature.
    =============================  =========================================  ======================================================
 
 Kinematic viscosity
@@ -219,6 +239,59 @@ The Ambrose-Walton\ :footcite:p:`ambrose_vapour_1989` correlation sets:
 with :math:`\tau_i = 1 - T_{r,i}`.
 
 
+Surface tension
+^^^^^^^^^^^^^^^
+
+Surface tension for each compound is approximated using the relation:
+
+.. math::
+   \sigma_i = p_{c,i}^{2/3} T_{c,i}^{1/3} Q_i (1 - T_{r,i})^{11/9},
+
+provided :math:`p_{c,i}` in bar.  The :math:`Q_i` term is defined by Brock and Bird\ :footcite:p:`brock_surface_1955` (default in FuelLib) as
+
+.. math:: 
+   Q_i = 0.1196 \bigg[1 + \frac{T_{r,b,i} \log(p_{c,i}/1.01325)}{1 - T_{r,b,i}}\bigg] - 0.279,
+
+or by Curl and Pitzer\ :footcite:p:`poling_properties_2001,curl_volumetric_1958,pitzer_thermodynamics_1995` as
+
+.. math::
+   Q_i = \frac{1.86 + 1.18 \omega_i}{19.05} \bigg[ \frac{3.75 + 0.91 \omega_i}{0.291 - 0.08\omega_i} \bigg]^{2/3}.
+
+
+Thermal conductivity
+^^^^^^^^^^^^^^^^^^^^
+ 
+Thermal conductivity for each compound is computed according to the method of 
+Latini et al. as summarized in Poling's\ :footcite:p:`poling_properties_2001` book:
+
+.. math:: 
+   \lambda_i = \frac{A_i(1 - T_{r,i})^{0.38}}{T_{r,i}^{1/6}}.
+
+The constant :math:`A_i` is defined by:
+
+.. math:: 
+   A_i = \frac{A^\ast T_{b,i}^\alpha}{M_{w,i} T_{c,i}^{\gamma}}, 
+
+provided :math:`M_{w,i}` in g/mol. The exponents vary depending on the family of 
+the compound as defined in :ref:`tab-thermal-conductivity-parameters`.  It is assumed
+that any compound containing aromatic group contributions (e.g. ACCH) are aromatics,
+any compound containing a ring (e.g. 5-membered ring) is a cycloparaffin provided the 
+absence of aromatic groups.  All other compounds are assumed to be saturated hydrocarbons. 
+
+.. _tab-thermal-conductivity-parameters:
+
+.. table:: Thermal conductivity relation parameters
+   :widths: auto
+   :align: center
+
+   ==========================  ===============  ===============  ===============  ===============  
+   Family                      :math:`A^\ast`   :math:`\alpha`   :math:`\beta`    :math:`\gamma`   
+   ==========================  ===============  ===============  ===============  =============== 
+   Saturated hydrocarbons      0.00350          1.2              0.5              0.167            
+   Cycloparaffins              0.0310           1.2              1.0              0.167            
+   Aromatics                   0.0346           1.2              1.0              0.167            
+   ==========================  ===============  ===============  ===============  =============== 
+
 .. _eq-mixture-properties:
 
 Equations for mixture properties from GCM
@@ -239,13 +312,14 @@ are used throughout this section.
    :widths: auto
    :align: center
    
-   =============  ===============  =====================
-   Symbol         Units            Description
-   =============  ===============  =====================
-   :math:`\rho`   kg/m\ :sup:`3`   Density
-   :math:`\nu`    m\ :sup:`2`/s    Kinematic viscosity
-   :math:`p_v`    Pa               Vapor pressure
-   =============  ===============  =====================
+   ===============  ===============  =====================
+   Symbol           Units            Description
+   ===============  ===============  =====================
+   :math:`\rho`     kg/m\ :sup:`3`   Density
+   :math:`\nu`      m\ :sup:`2`/s    Kinematic viscosity
+   :math:`p_v`      Pa               Vapor pressure
+   :math:`\sigma`   N/m              Surface tension
+   ===============  ===============  =====================
 
 .. table:: Mass and mole fractions
    :widths: auto
@@ -257,6 +331,30 @@ are used throughout this section.
    :math:`Y_i`    :math:`\frac{m_i}{\sum_{k=1}^{N_c} m_k}`   Mass fraction of compound *i*. :math:`m_i` is the mass of compound *i*.
    :math:`X_i`    :math:`\frac{n_i}{\sum_{k=1}^{N_c} n_k}`   Mole fraction of compound *i*. :math:`n_i` is the number of moles compound *i*.
    =============  ========================================  ==================================================================================
+
+.. _conventional-mixing-rules:
+
+Conventional mixing rules
+^^^^^^^^^^^^^^^^^^^^^^^^^
+While many of the mixture properties in FuelLib have a unique mixing rule,
+FuelLib's *mixingRule* function provides a general mixing rule based on the suggestions
+of Harstad et al\ :footcite:p:`harstad_efficient_1997`. For a given property :math:`Q`
+
+.. math::
+   Q = \sum_{i=1}^{N_c} \sum_{j=1}^{N_c} X_i X_j Q_{ij},
+
+where the pseudo-property for the couple of components, :math:`Q_{ij}` is computed
+using an arithmetic,
+
+.. math::
+   Q_{ij} = \frac{Q_i + Q_j}{2},
+
+or a geometric mean,
+
+.. math::
+   Q_{ij} = \sqrt{Q_i \cdot Q_j},
+
+where :math:`Q_i` is the property of the *i-th* compound of the multicomponent mixture.
 
 Mixture density
 ^^^^^^^^^^^^^^^
@@ -299,6 +397,14 @@ The vapor pressure of the mixture is calculated according to Raoult's law:
    p_{v} = \sum_{i = 1}^{N_c} X_i \, p_{\textit{sat},i}.
    \end{align*}
 
+Mixture surface tension
+^^^^^^^^^^^^^^^^^^^^^^^
+The surface tension of the mixture is calculated using the :ref:`conventional-mixing-rules`
+with an arithmetic mean for the pseudo-property :math:`\sigma_{i,j}` as recommended by
+Hugill and van Welsenes\ :footcite:p:`hugill_surface_1986`:
+
+.. math::
+   \sigma = \sum_{i=1}^{N_c} \sum_{j=1}^{N_c} X_i X_j \frac{\sigma_i + \sigma_j}{2}.
 
 Validation
 ----------
@@ -328,6 +434,12 @@ Multi-Component Fuels
    :align: center
 
 Density, vapor pressure and viscosity predictions for POSF10325 against data from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
+
+.. image:: /figures/mixtureProps-posf10289.png
+   :width: 600pt
+   :align: center
+
+Density, vapor pressure and viscosity predictions for POSF10289 against data from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
 
 References
 ----------
