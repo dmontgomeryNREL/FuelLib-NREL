@@ -26,24 +26,9 @@ class groupContribution:
     Y_0 = None    # Initial mass fraction for mixture (num_compounds,)
     Nij = None    # Compound vs. group matrix (num_compounds, num_groups)
     
-    # GCM table data from Constantinou and Gani (num_groups,)
+    # Number of first and second order groups from Constantinou and Gani
     N_g1 = 78
     N_g2 = 43
-    k_B = 1.380649e-23 # Boltzmann's constant J/K
-    Tck  = None
-    Pck  = None
-    Vck  = None
-    Tbk  = None
-    Tmk  = None
-    hfk  = None
-    gfk  = None
-    hvk  = None
-    wk   = None
-    Vmk  = None
-    cpak = None
-    cpbk = None
-    cpck = None
-    mwk  = None
     
     # critical properties at standard temp (num_compounds,)
     MW     = None
@@ -61,6 +46,12 @@ class groupContribution:
     Cp_B   = None
     Cp_C   = None
     Lv_stp = None
+
+    # Classifying hydrocarbon family
+    fam = None
+    
+    # Boltzmann's constant J/K
+    k_B = 1.380649e-23 
     
     def __init__(self, name="", W = 1):
         """
@@ -81,6 +72,20 @@ class groupContribution:
         self.Nij = df_Nij.iloc[:, 1:].to_numpy()  
         self.num_compounds = self.Nij.shape[0]
         self.num_groups = self.Nij.shape[1]
+
+        # Classify hydrocarbon by family (used in thermal conductivity)
+        # 0: saturated hydrocarbons
+        # 1: cycloparaffins
+        # 2: aromatics
+        self.fam = np.zeros(self.num_compounds,dtype=int)
+        for i in range(self.num_compounds):
+            for j in range(self.num_groups):
+                # Check if aromatic, does it contain AC's?
+                if (sum(self.Nij[i,10:15]) > 0):
+                    self.fam[i] = 2
+                # Check if cycloparaffin, does it contain # membered rings?
+                elif (sum(self.Nij[i,84:89]) > 0): 
+                    self.fam[i] = 1
 
         # Read initial liquid composition of mixture and normalize to get mass frac
         df_gcxgc = pd.read_excel(gcxgcFile, usecols=[1])
@@ -113,68 +118,68 @@ class groupContribution:
             self.Nij = self.Nij[:,0:self.N_g1]
         
         # Table data for functional groups (num_compounds,)
-        self.Tck  = gcm_properties[0]  # critical temperature (1)
-        self.Pck  = gcm_properties[1]  # critical pressure (bar)
-        self.Vck  = gcm_properties[2]  # critical volume (m^3/kmol)
-        self.Tbk  = gcm_properties[3]  # boiling temperature (1)
-        self.Tmk  = gcm_properties[4]  # melting point temperature (1)
-        self.hfk  = gcm_properties[5]  # enthalpy of formation, (kJ/mol)
-        self.gfk  = gcm_properties[6]  # Gibbs energy (kJ/mol)
-        self.hvk  = gcm_properties[7]  # latent heat of vaporization (kJ/mol)
-        self.wk   = gcm_properties[8]  # accentric factor (1)
-        self.Vmk  = gcm_properties[9]  # liquid molar volume fraction (m^3/kmol)
-        self.cpak = gcm_properties[10] # specific heat values (J/mol/K)
-        self.cpbk = gcm_properties[11] # specific heat values (J/mol/K)
-        self.cpck = gcm_properties[12] # specific heat values (J/mol/K)
-        self.mwk  = gcm_properties[13] # molecular weights (g/mol) 
+        Tck  = gcm_properties[0]  # critical temperature (1)
+        Pck  = gcm_properties[1]  # critical pressure (bar)
+        Vck  = gcm_properties[2]  # critical volume (m^3/kmol)
+        Tbk  = gcm_properties[3]  # boiling temperature (1)
+        Tmk  = gcm_properties[4]  # melting point temperature (1)
+        hfk  = gcm_properties[5]  # enthalpy of formation, (kJ/mol)
+        gfk  = gcm_properties[6]  # Gibbs energy (kJ/mol)
+        hvk  = gcm_properties[7]  # latent heat of vaporization (kJ/mol)
+        wk   = gcm_properties[8]  # accentric factor (1)
+        Vmk  = gcm_properties[9]  # liquid molar volume fraction (m^3/kmol)
+        cpak = gcm_properties[10] # specific heat values (J/mol/K)
+        cpbk = gcm_properties[11] # specific heat values (J/mol/K)
+        cpck = gcm_properties[12] # specific heat values (J/mol/K)
+        mwk  = gcm_properties[13] # molecular weights (g/mol) 
         
         # --- Compute critical properties at standard temp (num_compounds,)
         # Molecular weights
-        self.MW = np.matmul(self.Nij,self.mwk) # g/mol
+        self.MW = np.matmul(self.Nij,mwk) # g/mol
         self.MW *= 1e-3 # Convert to kg/mol
         
         # T_c (critical temperature)
-        self.Tc = 181.128*np.log(np.matmul(self.Nij,self.Tck)) # K
+        self.Tc = 181.128*np.log(np.matmul(self.Nij,Tck)) # K
 
         # p_c (critical pressure)
-        self.Pc = 1.3705 + (np.matmul(self.Nij,self.Pck) + 0.10022)**(-2) # bar
+        self.Pc = 1.3705 + (np.matmul(self.Nij,Pck) + 0.10022)**(-2) # bar
         self.Pc *= 1e5 # Convert to Pa from bar
 
         # V_c (critical volume)
-        self.Vc = -0.00435 + ( np.matmul(self.Nij,self.Vck) ) # m^3/kmol
+        self.Vc = -0.00435 + ( np.matmul(self.Nij,Vck) ) # m^3/kmol
         self.Vc *= 1e-3 # Convert to m^3/mol
 
         # T_b (boiling temperature)
-        self.Tb = 204.359*np.log( np.matmul(self.Nij,self.Tbk)) # K
+        self.Tb = 204.359*np.log( np.matmul(self.Nij,Tbk)) # K
 
         # T_m (melting temperature)
-        self.Tm = 102.425*np.log( np.matmul(self.Nij,self.Tmk)) # K
+        self.Tm = 102.425*np.log( np.matmul(self.Nij,Tmk)) # K
 
         # H_f (enthalpy of formation)
-        self.Hf = 10.835 + np.matmul(self.Nij,self.hfk) # kJ/mol
+        self.Hf = 10.835 + np.matmul(self.Nij,hfk) # kJ/mol
         self.Hf *= 1e3 # Convert to J/mol
 
         # G_f (Gibbs free energy)
-        self.Gf = -14.828 + np.matmul(self.Nij,self.gfk) # kJ/mol
+        self.Gf = -14.828 + np.matmul(self.Nij,gfk) # kJ/mol
         self.Gf *= 1e3 # Convert to J/mol
 
         # H_v,stp (enthalpy of vaporization at 298 K)
-        self.Hv_stp = 6.829 + (np.matmul(self.Nij,self.hvk)) # kJ/mol
+        self.Hv_stp = 6.829 + (np.matmul(self.Nij,hvk)) # kJ/mol
         self.Hv_stp *= 1e3 # Convert to J/mol
 
         # omega (accentric factor)
-        self.omega = 0.4085 * np.log(np.matmul(self.Nij, self.wk) + 1.1507)**(1.0 / 0.5050)
+        self.omega = 0.4085 * np.log(np.matmul(self.Nij, wk) + 1.1507)**(1.0 / 0.5050)
 
         # V_m (molar liquid volume at 298 K)
-        self.Vm_stp = 0.01211 + np.matmul(self.Nij,self.Vmk)  # m^3/kmol
+        self.Vm_stp = 0.01211 + np.matmul(self.Nij,Vmk)  # m^3/kmol
         self.Vm_stp *= 1e-3 # Convert to m^3/mol
 
         # C_p,stp (specific heat at 298 K)
-        self.Cp_stp = np.matmul(self.Nij, self.cpak) - 19.7779 # J/mol/K
+        self.Cp_stp = np.matmul(self.Nij, cpak) - 19.7779 # J/mol/K
 
         # Temperature corrections for C_p
-        self.Cp_B = np.matmul(self.Nij, self.cpbk)
-        self.Cp_C = np.matmul(self.Nij, self.cpck)
+        self.Cp_B = np.matmul(self.Nij, cpbk)
+        self.Cp_C = np.matmul(self.Nij, cpck)
 
         # L_v,stp (latent heat of vaporization at 298 K)
         self.Lv_stp = self.Hv_stp / self.MW # J/kg
@@ -381,13 +386,13 @@ class groupContribution:
         Lvi = np.zeros_like(self.Tc)
         
         Tr    = T / self.Tc
-        Trnbi = self.Tb / self.Tc
+        Trb = self.Tb / self.Tc
 
         for i in range(0,self.Tc.shape[0]):
             if (T > self.Tc[i]):
                 Lvi[i] = 0.
             else:
-                Lvi[i] =  self.Lv_stp[i] * (( (1. - Tr[i] ) / (1. - Trnbi[i]) )**0.38)
+                Lvi[i] =  self.Lv_stp[i] * (( (1. - Tr[i] ) / (1. - Trb[i]) )**0.38)
         
         return Lvi
     
@@ -435,6 +440,73 @@ class groupContribution:
 
         return D_AB
     
+    def surface_tension(self, T, correlation = "Brock-Bird"):
+        """
+        Calculate the surface tension at a given temperature. Both 
+        correlations can be found in Poling's book. Brock-Bird is eqt. 12-3.5 and
+        Pitzer is eqt. 12-3.7. 
+
+        Parameters:
+        T (float): Temperature in Kelvin.
+        correlation (str, optional): "Brock-Bird" or "Pitzer".
+
+        Returns:
+        np.ndarray: Surface tension in N/m (num_compounds,)
+        """
+        Tr = T / self.Tc
+        Pc = self.Pc*1e-5 # convert from Pa to bar
+        Tc = self.Tc # K
+
+        if (correlation.casefold() == "Brock-Bird".casefold()):
+            Tbr = self.Tb / Tc
+            Q = 0.1196 * (1. + (Tbr * np.log(Pc/1.01325)) / (1. - Tbr)) - 0.279
+        else:
+            w = self.omega
+            Q = (1.86 + 1.18*w)/19.05 \
+                * (((3.75 + 0.91*w)/(0.291 - 0.08*w))**(2./3.))
+            
+        st = Pc**(2./3.) * Tc**(1./3.) * Q * (1 - Tr)**(11./9.)
+        
+        st *= 1e-3 # Convert from dyn/cm to N/m
+
+        return st
+    
+    def thermal_conductivity(self,T):
+        """
+        Calculate the thermal conductivity at a given temperature using the 
+        method of Latini et al. equation (10-9.1) in Poling.
+
+        Parameters:
+        T (float): Temperature in Kelvin.
+
+        Returns:
+        np.ndarray: Thermal conductivity in W/m/K (num_compounds,)
+        """
+
+        Astar = 0.00350 + np.zeros(self.num_compounds)
+        alpha = 1.2
+        beta = 0.5 + np.zeros(self.num_compounds)
+        gamma = 0.167
+        MW_beta = self.MW*1e3 # convert from kg/mol to g/mol
+        Tr = T / self.Tc
+
+        for i in range(self.num_compounds):
+            if self.fam[i] == 1:
+                # Cycloparaffins
+                Astar[i] = 0.0310
+                beta[i] = 1.0
+            elif self.fam[i] == 2:
+                # Aromatics
+                Astar[i] = 0.0346
+                beta[i] = 1.0
+            MW_beta[i] = MW_beta[i]**beta[i]
+
+        A = Astar * self.Tb**alpha / (MW_beta * self.Tc**gamma)
+        tc = A * (1 - Tr)**(0.38) / (Tr**(1/6))
+
+        return tc
+
+    # --- Mixture functions ---
     def mixture_density(self, Yi, T):
         """
         Calculate the mixture density at a given temperature.
@@ -522,6 +594,31 @@ class groupContribution:
         p_v = p_sati @ Xi
         
         return p_v
+    
+    def mixture_surface_tension(self, mass, T, correlation = "Brock-Bird"):
+        """
+        Calculate the surface tension of the mixture using an arithmetic psuedo-
+        property as recommended by Hugill and van Welsenes (1986).
+
+        Parameters:
+        mass (np.ndarray): Mass of each compound of mixture (shape: num_compounds,).
+        T (float): Temperature in Kelvin. 
+        correlation (str, optional): "Pitzer" or "Brock-Bird". 
+
+        Returns:
+        float: surface tension in N/m.
+        """
+        
+        # Group mole fraction for each compound
+        Xi = self.mole_frac(mass)
+
+        # Surface tension for each compound (N/m)
+        sti = self.surface_tension(T,correlation)
+
+        # Mixture surface tension via arithmetic mean, Poling (12-5.2)
+        st = mixingRule(sti,Xi,"arithmetic")
+        
+        return st
 
 # -----------------------------------------------------------------------------
 # Utility functions
@@ -549,3 +646,28 @@ def K2C(T):
     float or np.array: Temperature in Celsius.
     """
     return T - 273.15
+
+def mixingRule(var_n,X,pseudo_prop='arithmetic'):
+    """
+    Mixing rules for computing mixture properties from individual compound properties.
+
+    Parameters:
+    var_n (np.array): Individual compound properties (shape: num_compounds,).
+    X (np.array): Mole fraction (shape: num_compounds,).
+    pseudo_prop (str, optional): Type of mean (e.g. arithmetic of geometric).
+
+    Returns:
+    float: Single mixture property with units of var_n.  
+    """
+    num_comps = len(var_n)
+    var_mix = 0.0
+    for i in range(num_comps):
+        for j in range(num_comps):
+            if pseudo_prop.casefold() == 'geometric':
+                # Use geometric mean definition for the pseudo property
+                var_ij = (var_n[i] * var_n[j])**(0.5)
+            else:
+                # Use arithmetic definition for the pseudo property
+                var_ij = (var_n[i] + var_n[j]) / 2
+            var_mix += X[i] * X[j] * var_ij
+    return var_mix
