@@ -16,7 +16,7 @@ class groupContribution:
     gcxgcDir = os.path.join(fuelDataDir, 'gcData')
 
     # Path to GCM table
-    gcmTableFile = os.path.join(gcmTableDir, 'gcmTable.xlsx')
+    gcmTableFile = os.path.join(gcmTableDir, 'gcmTable.csv')
 
     # Class-level variables to hold mixture-specific data and GCM table properties
     name = ''
@@ -67,31 +67,40 @@ class groupContribution:
         self.name = name
         if decompName is None:
             decompName = name
-        groupDecompFile = os.path.join(self.groupDecompDir, f"{decompName}.xlsx")
-        gcxgcFile = os.path.join(self.gcxgcDir, f"{name}_init.xlsx")
+        groupDecompFile = os.path.join(self.groupDecompDir, f"{decompName}.csv")
+        gcxgcFile = os.path.join(self.gcxgcDir, f"{name}_init.csv")
 
         # Read functional group data for mixture (num_compounds,num_groups)
-        df_Nij = pd.read_excel(groupDecompFile)
+        df_Nij = pd.read_csv(groupDecompFile)
         self.Nij = df_Nij.iloc[:, 1:].to_numpy()  
         self.num_compounds = self.Nij.shape[0]
         self.num_groups = self.Nij.shape[1]
 
         # Classify hydrocarbon by family (used in thermal conductivity)
         # 0: saturated hydrocarbons
-        # 1: cycloparaffins
-        # 2: aromatics
+        # 1: aromatics
+        # 2: cycloparaffins
+        # 3: olefins
         self.fam = np.zeros(self.num_compounds,dtype=int)
+        aromatics = 10 # starting index for aromatic groups
+        num_aromatics = 5
+        cyclos = 84 # starting index for membered ring groups
+        num_cyclos = 5
+        olefins = 4 # starting index for double bound groups
+        num_olefins = 6
         for i in range(self.num_compounds):
-            for j in range(self.num_groups):
-                # Check if aromatic, does it contain AC's?
-                if (sum(self.Nij[i,10:15]) > 0):
-                    self.fam[i] = 2
-                # Check if cycloparaffin, does it contain # membered rings?
-                elif (sum(self.Nij[i,84:89]) > 0): 
-                    self.fam[i] = 1
+            # Check if aromatic: does it contain AC's?
+            if (sum(self.Nij[i,aromatics:aromatics+num_aromatics]) > 0):
+                self.fam[i] = 1
+            # Check if cycloparaffin: does it contain rings?
+            elif (sum(self.Nij[i,cyclos:cyclos+num_cyclos]) > 0): 
+                self.fam[i] = 2
+            # Check if olefin: does it contain double bonds?
+            elif (sum(self.Nij[i,olefins:olefins+num_olefins]) > 0): 
+                self.fam[i] = 3
 
         # Read initial liquid composition of mixture and normalize to get mass frac
-        df_gcxgc = pd.read_excel(gcxgcFile, usecols=[1])
+        df_gcxgc = pd.read_csv(gcxgcFile, usecols=[1])
         self.Y_0 = df_gcxgc.to_numpy().flatten().astype(float)
         self.Y_0 /= np.sum(self.Y_0)
 
@@ -110,7 +119,7 @@ class groupContribution:
                 )
         
         # Read and store GCM table properties
-        df_gcm_properties = pd.read_excel(self.gcmTableFile)
+        df_gcm_properties = pd.read_csv(self.gcmTableFile)
         gcm_properties = df_gcm_properties.loc[:, 
             ~df_gcm_properties.columns.isin(['Property', 'Units'])].to_numpy()
         
@@ -514,12 +523,16 @@ class groupContribution:
 
         for i in range(self.num_compounds):
             if self.fam[i] == 1:
+                # Aromatics
+                Astar[i] = 0.0346
+                beta[i] = 1.0 
+            elif self.fam[i] == 2:
                 # Cycloparaffins
                 Astar[i] = 0.0310
                 beta[i] = 1.0
-            elif self.fam[i] == 2:
-                # Aromatics
-                Astar[i] = 0.0346
+            elif self.fam[i] == 3:
+                # Olefins
+                Astar[i] = 0.0361
                 beta[i] = 1.0
             MW_beta[i] = MW_beta[i]**beta[i]
 

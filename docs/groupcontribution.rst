@@ -270,13 +270,17 @@ Latini et al. as summarized in Poling's\ :footcite:p:`poling_properties_2001` bo
 The constant :math:`A_i` is defined by:
 
 .. math:: 
-   A_i = \frac{A^\ast T_{b,i}^\alpha}{M_{w,i} T_{c,i}^{\gamma}}, 
+   A_i = \frac{A^\ast T_{b,i}^\alpha}{M_{w,i}^\beta T_{c,i}^{\gamma}}, 
 
 provided :math:`M_{w,i}` in g/mol. The exponents vary depending on the family of 
 the compound as defined in :ref:`tab-thermal-conductivity-parameters`.  It is assumed
-that any compound containing aromatic group contributions (e.g. ACCH) are aromatics,
-any compound containing a ring (e.g. 5-membered ring) is a cycloparaffin provided the 
-absence of aromatic groups.  All other compounds are assumed to be saturated hydrocarbons. 
+that:
+
+* aromatics have contain aromatic group contributions (e.g. ACCH)
+* cycloparaffins contain a ring (e.g. 5-membered ring) and do not contain aromatic groups  
+* olefins contain one or more pairs of carbon atoms linked by a double bond and do not contain aromatic groups or rings
+* all other compounds are assumed to be saturated hydrocarbons. 
+
 
 .. _tab-thermal-conductivity-parameters:
 
@@ -284,13 +288,14 @@ absence of aromatic groups.  All other compounds are assumed to be saturated hyd
    :widths: auto
    :align: center
 
-   ==========================  ===============  ===============  ===============  ===============  
-   Family                      :math:`A^\ast`   :math:`\alpha`   :math:`\beta`    :math:`\gamma`   
-   ==========================  ===============  ===============  ===============  =============== 
-   Saturated hydrocarbons      0.00350          1.2              0.5              0.167            
-   Cycloparaffins              0.0310           1.2              1.0              0.167            
-   Aromatics                   0.0346           1.2              1.0              0.167            
-   ==========================  ===============  ===============  ===============  =============== 
+   ===========  ==========================  ===============  ===============  ===============  ===============  
+   Identifier   Family                      :math:`A^\ast`   :math:`\alpha`   :math:`\beta`    :math:`\gamma`   
+   ===========  ==========================  ===============  ===============  ===============  =============== 
+   0            Saturated hydrocarbons      0.00350          1.2              0.5              0.167
+   1            Aromatics                   0.0346           1.2              1.0              0.167            
+   2            Cycloparaffins              0.0310           1.2              1.0              0.167            
+   3            Olefins                     0.0361           1.2              1.0              0.167         
+   ===========  ==========================  ===============  ===============  ===============  =============== 
 
 .. _eq-mixture-properties:
 

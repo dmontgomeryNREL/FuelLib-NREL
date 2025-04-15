@@ -4,7 +4,7 @@ FuelLib (SWR-25-26) utilizes the tables and functions of the Group Contribution 
 ## Python Environment
 The following conda environment is required to run this code:
 ~~~
-conda create --name fuellib-env ipython matplotlib pandas scipy openpyxl
+conda create --name fuellib-env matplotlib pandas
 ~~~
 
 ## Running the code

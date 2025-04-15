@@ -10,7 +10,7 @@ import GroupContributionMethod as gcm
 
 # Fuel for GCM and data for validation (see fuelData/propertiesData for options)
 # Options: 'decane', 'dodecane', 'heptane', 'posf10264', 'posf10289', 'posf10325'
-fuel_name = 'posf10264'
+fuel_name = 'posf10325'
 
 # How much fuel? Amount does not matter.
 drop_volume = 1e-9 # assume 1 microliter of fuel
@@ -141,11 +141,11 @@ axes[3].legend(fontsize=fsize-2)
 
 
 plt.tight_layout(rect=[0.001, 0.03, 1, 0.99])
-plt.show()
 
+
+# Thermal Conductivity
 if 'posf' not in fuel_name:
     fig2 = plt.figure(figsize=(6, 5))
-# Thermal Conductivity
     plt.plot(gcm.K2C(T_tc), tc, '-', label='Model Prediction', linewidth=line_thickness)
     plt.scatter(T_tc_data, tc_data, label=data_source, facecolors='black', s=marker_size)
     plt.xlim([min(T_tc_data-10), max(T_tc_data+10)])
@@ -154,4 +154,4 @@ if 'posf' not in fuel_name:
     plt.legend(fontsize=10)
     plt.tick_params(axis='both', labelsize=ticksize)
     plt.tight_layout()
-    plt.show()
+plt.show()
