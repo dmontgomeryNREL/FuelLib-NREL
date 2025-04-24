@@ -1,4 +1,4 @@
-﻿Temperature,Density,Viscosity,VaporPressure,DynamicViscosity,SurfaceTension,ThermalCond
+﻿Temperature,Density,Viscosity,VaporPressure,DynamicViscosity,SurfaceTension,ThermalConductivity
 C,g/cm^3,mm^2/s,kPa,Pa*s,N/m,W/m/K
 -60,0.75019,1.937642464,,0.0014536,,
 -50,0.74191,1.570136539,,0.0011649,,

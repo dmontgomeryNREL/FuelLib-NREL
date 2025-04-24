@@ -654,6 +654,20 @@ class groupContribution:
         st = mixingRule(sti,Xi,"arithmetic")
         
         return st
+    
+    def mixture_thermal_conductivity(self,mass,T):
+        """
+        Calculate the thermal conductivity of the mixture.
+
+        Parameters:
+        T (float): Temperature in Kelvin. 
+
+        Returns:
+        float: thermal conductivity in W/m/K.
+        """
+        Yi = self.mass_frac(mass)
+        tc = self.thermal_conductivity(T)
+        return np.sum(Yi*tc**(-2))**(-0.5)
 
 # -----------------------------------------------------------------------------
 # Utility functions
