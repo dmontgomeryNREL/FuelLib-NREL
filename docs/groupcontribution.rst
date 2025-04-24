@@ -324,6 +324,7 @@ are used throughout this section.
    :math:`\nu`      m\ :sup:`2`/s    Kinematic viscosity
    :math:`p_v`      Pa               Vapor pressure
    :math:`\sigma`   N/m              Surface tension
+   :math:`\lambda`  W/m/K            Thermal conductivity
    ===============  ===============  =====================
 
 .. table:: Mass and mole fractions
@@ -411,21 +412,21 @@ Hugill and van Welsenes\ :footcite:p:`hugill_surface_1986`:
 .. math::
    \sigma = \sum_{i=1}^{N_c} \sum_{j=1}^{N_c} X_i X_j \frac{\sigma_i + \sigma_j}{2}.
 
+Mixture thermal conductivity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The thermal conductivity of the mixture is calculated using the power law method of 
+Vredeveld as described in Poling\ :footcite:p:`poling_properties_2001`:
+
+.. math::
+   \lambda = \bigg(\sum_{i=1}^{N_c} X_i \lambda_i^{-2} \bigg)^{-1/2}.
+
 Validation
 ----------
 
 Single Component Fuels
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: /figures/mixtureProps-decane.png
-   :width: 600pt
-   :align: center
-
-.. image:: /figures/mixtureProps-dodecane.png
-   :width: 600pt
-   :align: center
-
-.. image:: /figures/mixtureProps-heptane.png
+.. image:: /figures/singleCompFuels.png
    :width: 600pt
    :align: center
    
@@ -434,17 +435,15 @@ Properties of decane, dodecane, and heptane.  Data from NIST Chemistry WebBook.
 Multi-Component Fuels
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: /figures/mixtureProps-posf10325.png
+.. image:: /figures/multiCompFuels.png
    :width: 600pt
    :align: center
 
-Density, vapor pressure and viscosity predictions for POSF10325 against data from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
+Properties of JP-8 (POSF10264), Jet A (POSF10325), and JP-5 (POSF10289) against data 
+from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`. Note that 
+the data sets for thermal conductivity are very inconsistent, but they typically show 
+linear decreases in thermal conductivity with temperature. 
 
-.. image:: /figures/mixtureProps-posf10289.png
-   :width: 600pt
-   :align: center
-
-Density, vapor pressure and viscosity predictions for POSF10289 against data from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
 
 References
 ----------
