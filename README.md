@@ -17,7 +17,7 @@ New contributions are always welcome.  If you have an idea for a new feature fol
 3. Update the sphinx documentation in `newFeature`
 4. Format the source code files using the [Black code formatter](https://github.com/psf/black) by running the following command:
    ~~~
-   black *.py
+   find . -name "*.py" -print0 | xargs -0 black
    ~~~
 5. Open a Pull Request (PR) from `newFeature` on your fork to branch `main` FuelLib repository.
 
