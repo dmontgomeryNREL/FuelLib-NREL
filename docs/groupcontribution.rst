@@ -10,12 +10,12 @@ each contributing to a target property based on predefined group values.
 By summing these contributions, the GCM accurately predicts essential properties, 
 including the acentric factor, normal boiling point, liquid molar volume at standard conditions 
 (298 K) and more. This predictive capability is particularly useful for complex 
-mixtures such as sustainable aviation fuels (SAFs), where experimental thermodynamic data 
-is limited. `FuelLib` provides SAF developers with a means to estimate 
+mixtures such as synthetic aviation turbine fuels (SATFs), where experimental thermodynamic data 
+is limited. `FuelLib` provides SATF developers with a means to estimate 
 these critical properties without extensive physical testing, thereby aiding in 
 the identification of promising fuel compositions before committing to large-scale production.
 
-`FuelLib` was developed with SAF research in mind. It builds on 
+`FuelLib` builds on 
 `Pavan B. Govindaraju's Matlab implementation <https://github.com/gpavanb-old/GroupContribution>`_, 
 and includes gas chromatography data (GC x GC) for various jet fuels from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
 Additionally, `FuelLib` includes correlations for the thermodynamic properties of 
