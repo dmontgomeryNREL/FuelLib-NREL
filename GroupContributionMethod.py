@@ -490,7 +490,7 @@ class groupContribution:
             + G / np.exp(H * Tstar_i)
         )
 
-        # Convert molecular weights from kg/mol to g/mol then calcualte M_AB
+        # Convert molecular weights from kg/mol to g/mol then calculate M_AB
         MW_gas *= 1e3
         MW_i = self.MW * 1e3
         M_AB_i = 2 * (MW_i * MW_gas) / (MW_i + MW_gas)  # g/mol, see Poling (11-3.1)

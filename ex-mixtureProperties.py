@@ -89,7 +89,7 @@ def getPredAndData(fuel_name, prop_name):
     dataPath = os.path.join(fuel.fuelDataDir, "propertiesData")
     data = pd.read_csv(os.path.join(dataPath, data_file), skiprows=[1])
 
-    # Seperate properties and associated temperatures from data
+    # Separate properties and associated temperatures from data
     T_data = data.Temperature[data[prop_name].notna()]
     prop_data = data[prop_name].dropna()
 
