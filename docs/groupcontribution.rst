@@ -99,7 +99,7 @@ given that group contribution properties are only defined at standard conditions
 Unless noted otherwise in the individual correlation, all units are assumed to be SI: 
 length (m), mass (kg), time (s), temperature (K), mole (mol).
 The :ref:`tab-reduced-temps` are used throughout this section for each compound *i*, 
-provided :math:`T` in :math:`^{\circ}` K unless noted otherwise.
+provided :math:`T` in K unless noted otherwise.
 
 .. _tab-correlation-qtys:
 
@@ -308,7 +308,7 @@ mixture from the individual compound and physical properties defined in
 it possible to evaluate physical properties at non-standard temperatures and 
 pressures, given that group contribution properties are only defined at standard 
 conditions. The :ref:`tab-mixture-properties` available in `FuelLib` are listed in 
-table below.  Mass and mole fractions defined in Table \ref{tab:mass-mole-fracs} 
+table below.  Mass and mole fractions defined in Table :ref:`tab:mass-mole-fracs`` 
 are used throughout this section.
 
 .. _tab-mixture-properties:
@@ -326,6 +326,8 @@ are used throughout this section.
    :math:`\sigma`   N/m              Surface tension
    :math:`\lambda`  W/m/K            Thermal conductivity
    ===============  ===============  =====================
+
+.. _tab-mass-mole-fracs:
 
 .. table:: Mass and mole fractions
    :widths: auto
