@@ -306,7 +306,7 @@ This section contains correlations for estimating physical properties of the
 mixture from the individual compound and physical properties defined in 
 :ref:`eq-GCM-properties` and :ref:`eq-GCM-correlations`.  These correlations make 
 it possible to evaluate physical properties at non-standard temperatures and 
-pressures, given that group contribution properties are only defined at standard 
+pressures, as the group contribution properties are only defined at standard 
 conditions. The :ref:`tab-mixture-properties` available in `FuelLib` are listed in 
 table below.  Mass and mole fractions defined in Table :ref:`tab:mass-mole-fracs`` 
 are used throughout this section.
@@ -378,8 +378,8 @@ Mixture kinematic viscosity
 
 The kinematic viscosity of the mixture is computed using the Kendall-Monroe\ :footcite:p:`kendall_viscosity_1917` 
 mixing rule, with an option to use the Arrhenius\ :footcite:p:`arrhenius_uber_1887` 
-mixing rule. The viscosity of each component.  Hernandez et al.\ :footcite:p:`hernandez_evaluation_2021` 
-found, after evaluating thirty mixing rules, that both Kendall-Monroe and Arrhenius 
+mixing rule. The viscosity of each component. After evaluating thirty mixing rules,  Hernandez et al.\ :footcite:p:`hernandez_evaluation_2021` 
+found that both Kendall-Monroe and Arrhenius 
 were among the most effective without relying on additional data or parameter fitting. 
 The Kendall-Monroe rule is: 
 
