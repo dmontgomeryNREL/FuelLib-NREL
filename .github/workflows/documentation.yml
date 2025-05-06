@@ -1,6 +1,11 @@
 name: documentation
 
-on: [push, pull_request, workflow_dispatch]
+on: 
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
@@ -27,11 +32,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-bibtex
+          pip install sphinx sphinx_rtd_theme myst_parser sphinxcontrib-bibtex pandas
 
       - name: Build docs
         run: |
-          sphinx-build -b html docs _build
+          sphinx-build -b html -W docs _build
 
       - name: Upload artifact (for PR preview or later steps)
         uses: actions/upload-artifact@v4
