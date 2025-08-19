@@ -5,33 +5,39 @@ This page provides an overview of the source code available at `github.com/NREL/
 
 .. _source-code-structure:
 
-FuelLib File Structure
-----------------------
+FuelLib File Organization
+-------------------------
 
-- *GroupContributionMethod.py*: class for enabling GCM predictions
-- *ex_mixtureProperties.py*: validation script that calculates mixture properties
-- **gcmTableData:** directory that contains the pre-tabulated group contributions
+- **docs:** directory containing the documentation source files
+- **tutorials:** directory containing example scripts that demonstrate how to use FuelLib
+
+    - ``basic.py``: example script that demonstrates basic usage of FuelLib
+    - ``compositionPlots.py``: example script that generates composition plots for a given fuel
+    - ``hefaBlends.py``: example script that calculates properties of HEFA:Jet-A blends
+    - ``mixtureProperties.py``: validation script that calculates properties of single component fuels and mixture properties of multicomponent fuels.
+- ``Export4Converge.py``: script that exports mixture properties over a range of user specified temperatures for use in Converge simulations.
+- ``Export4Pele.py``: script that exports critical properties and initial mass fraction data for use in Pele simulations.
 - **fuelData:** 
     - **gcData:** directory containing a collection of GCxGC compositional data by weight percentages
     - **groupDecompositionData:** directory containing a collection of functional group decompositions
-    - **propertiesData:** directory containing measurement or predicted data for validation (see *dataReferences.md*)
-    - **baselinePredictions:** directory that contains FuelLib's baseline predictions for specified fuels and properties, which are used in CI test to ensure future changes preserve model accuracy (see next section).
+    - **propertiesData:** directory containing measurement or predicted data for validation (see *fuelData/dataReferences.md*)
+- **gcmTableData:** directory that contains the pre-tabulated group contributions
+- ``FuelLib.py``: class for enabling GCM predictions
+- **tests:**  directory containing CI unit tests for FuelLib. The CI test checks if the cumulative error of property predictions of a new proposed model are less than or equal to the current model.
+    
+    - **baselinePredictions:** directory that contains baseline predictions
+    - ``test_accuracy.py``: unit test used in CI for verifying new model predictions preserve accuracy
+    - ``test_baseline.py``: generates .csv files for the baseline model predictions, which are stored in **baselinePredictions**
+    - ``test_functions.py``: collection of functions used by ``test_baseline.py`` and ``test_accuracy.py``.   
 
-CI testing scripts
-^^^^^^^^^^^^^^^^^^
-The following scripts are used to ensure new changes don't negatively impact FuelLib's
-predictive capabilities.  Specifically, the CI test checks if the cumulative error of 
-property predictions of a new proposed model are less than or equal to the current model.
 
-- *test_baseline.py*: generates .csv files for the baseline model predictions, which are stored in **baselinePredictions**
-- *test_accuracy.py*: unit test for verifying new model predictions preserve accuracy
-- *test_functions.py*: collection of functions used by *test_baseline.py* and *test_accuracy.py*.   
-
-API
----
-Click on GroupContributionMethod below for the full API. 
+Source Code Auto-Documentation
+------------------------------
+Click on links below for the full auto-documentation.
 
 .. autosummary::
     :toctree: generated
 
-    GroupContributionMethod
+    FuelLib
+    Export4Pele
+    Export4Converge

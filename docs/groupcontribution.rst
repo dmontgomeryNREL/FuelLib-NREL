@@ -3,7 +3,7 @@ Properties and Model Equations
 
 The **Fuel Library** for advanced research on evaporation **(FuelLib)** utilizes
 the group contribution method (GCM), as developed by Constantinou and 
-Gani\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995` in the mid-1990s, 
+Gani\ :footcite:p:`constantinou_new_1994` \ :footcite:p:`constantinou_estimation_1995` in the mid-1990s, 
 to provide a systematic approach for estimating the thermodynamic properties of
 pure organic compounds. The GCM decomposes molecules into structural groups, 
 each contributing to a target property based on predefined group values. 
@@ -17,9 +17,10 @@ the identification of promising fuel compositions before committing to large-sca
 
 `FuelLib` builds on 
 `Pavan B. Govindaraju's Matlab implementation <https://github.com/gpavanb-old/GroupContribution>`_, 
-and includes gas chromatography data (GC x GC) for various jet fuels from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`.
+and includes gas chromatography data (GC x GC) for various jet fuels from the National Jet Fuel Combustion Program\ :footcite:p:`colket_overview_2017` (NJFCP) 
+Air Force Research Laboratory\ :footcite:p:`edwards_reference_2017` \ :footcite:p:`edwards_jet_2020` (AFRL) and Vozka et al.\ :footcite:p:`vozka_impact_2018`.
 Additionally, `FuelLib` includes correlations for the thermodynamic properties of 
-mixture such as density, viscosity and vapor pressure. The Section :ref:`tab-GCM-properties` 
+mixture such as density, viscosity, vapor pressure, surface tension, and thermal conductivity. :ref:`tab-GCM-properties` 
 outlines the properties for the *i-th* compound in a mixture, which depends on 
 the *k-th* first-order and *j-th* second-order group contributions.
 
@@ -46,7 +47,7 @@ Table of GCM properties
    :math:`\Delta H_{v,\textit{stp},i}`   J/mol                  :math:`h_{v1k}`, :math:`h_{v2j}`             kJ/mol                Enthalpy of vaporization at 298 K\ :footcite:p:`constantinou_new_1994`.
    :math:`\omega_i`                      1                      :math:`\omega_{1k}`, :math:`\omega_{2j}`     1                     Acentric factor\ :footcite:p:`constantinou_estimation_1995`.
    :math:`V_{m,\textit{stp},i}`          m\ :sup:`3`\ /mol      :math:`v_{m1k}`, :math:`v_{m2j}`             m\ :sup:`3`\ /kmol    Liquid molar volume at 298 K\ :footcite:p:`constantinou_estimation_1995`. 
-   :math:`C_{p,i}`                       J/mol/K                :math:`C_{pA1_k}`, :math:`C_{pA2_k}`,...     J/mol/K               Specific heat capacity\ :footcite:p:`nielsen_molecular_1998,poling_properties_2001`.
+   :math:`C_{p,i}`                       J/mol/K                :math:`C_{pA1_k}`, :math:`C_{pA2_k}`,...     J/mol/K               Specific heat capacity\ :footcite:p:`nielsen_molecular_1998` \ :footcite:p:`poling_properties_2001`.
    ====================================  =====================  ===========================================  ====================  ===========================================================
 
 .. _eq-GCM-properties:
@@ -66,7 +67,7 @@ number of second-order groups. The total number of groups :math:`N_g = N_{g_1} +
 Define a parameter :math:`W` such that :math:`W = 0` performs a first-order group only 
 calculation, while :math:`W = 1` includes second-order groups. The GCM properties for 
 the *i-th* compound in the mixture are calculated as 
-follows\ :footcite:p:`constantinou_new_1994,constantinou_estimation_1995,poling_properties_2001`:
+follows\ :footcite:p:`constantinou_new_1994` \ :footcite:p:`constantinou_estimation_1995` \ :footcite:p:`poling_properties_2001`:
 
 .. math::
 
@@ -115,10 +116,10 @@ provided :math:`T` in K unless noted otherwise.
    :math:`\nu_i`                  m\ :sup:`2`\ /s        Kinematic viscosity\ :footcite:p:`viswanath_viscosity_2007`.
    :math:`L_{v,\textit{stp},i}`   J/kg                   Latent heat of vaporization at 298 K\ :footcite:p:`govindaraju_group_2016`.
    :math:`L_{v,i}`                J/kg                   Temperature-adjusted latent heat of vaporization at 298 K\ :footcite:p:`govindaraju_group_2016`.
-   :math:`V_{m,i}`                m\ :sup:`3`\ /mol      Temperature-adjusted liquid molar volume\ :footcite:p:`rackett_equation_1970,yamada_saturated_1973,govindaraju_group_2016`.
+   :math:`V_{m,i}`                m\ :sup:`3`\ /mol      Temperature-adjusted liquid molar volume\ :footcite:p:`rackett_equation_1970` \ :footcite:p:`yamada_saturated_1973` \ :footcite:p:`govindaraju_group_2016`.
    :math:`\rho_i`                 kg/m\ :sup:`3`         Density
    :math:`C_{\ell,i}`             J/kg/K                 Liquid specific heat capacity\ :footcite:p:`govindaraju_group_2016`. 
-   :math:`p_{sat,i}`              Pa                     Saturated vapor pressure\ :footcite:p:`lee_generalized_1975,ambrose_vapour_1989`.
+   :math:`p_{sat,i}`              Pa                     Saturated vapor pressure\ :footcite:p:`lee_generalized_1975` \ :footcite:p:`ambrose_vapour_1989`.
    :math:`\sigma_i`               N/m                    Surface tension\ :footcite:p:`brock_surface_1955`.
    :math:`\lambda_i`              W/m/K                  Thermal conductivity\ :footcite:p:`poling_properties_2001`.
    =============================  =====================  ===============================================================
@@ -142,7 +143,7 @@ provided :math:`T` in K unless noted otherwise.
 Kinematic viscosity
 ^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.viscosity_kinematic
+.. automethod:: FuelLib.groupContribution.viscosity_kinematic
    :noindex:
 
 The kinematic viscosity of the *i-th* compound of the fuel, 
@@ -165,7 +166,7 @@ Liquids\ :footcite:p:`viswanath_viscosity_2007`) provided :math:`T` in :math:`^{
 Latent heat of vaporization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.latent_heat_vaporization
+.. automethod:: FuelLib.groupContribution.latent_heat_vaporization
    :noindex:
 
 The latent heat of vaporization for each compound at standard pressure and 
@@ -184,11 +185,11 @@ temperature\ :footcite:p:`govindaraju_group_2016`:
 Liquid molar volume
 ^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.molar_liquid_vol
+.. automethod:: FuelLib.groupContribution.molar_liquid_vol
    :noindex:
 
 The liquid molar volume is calculated at a specific temperature :math:`T` using 
-the generalized Rackett equation\ :footcite:p:`rackett_equation_1970,yamada_saturated_1973` 
+the generalized Rackett equation\ :footcite:p:`rackett_equation_1970` \ :footcite:p:`yamada_saturated_1973` 
 with an updated :math:`\phi_i` parameter\ :footcite:p:`govindaraju_group_2016`:
 
 .. math::
@@ -210,10 +211,10 @@ where
 Density
 ^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.density
+.. automethod:: FuelLib.groupContribution.density
    :noindex:
 
-The density of the *i-th* compond is given by
+The density of the *i-th* compound is given by
 
 .. math::
    \rho_i = \frac{M_{w,i}}{V_{m,i}}.
@@ -222,7 +223,7 @@ The density of the *i-th* compond is given by
 Liquid specific heat capacity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.Cl
+.. automethod:: FuelLib.groupContribution.Cl
    :noindex:
 
 The liquid specific heat capacity for each compound at standard pressure temperature is calculated from the specific heat capacity as:
@@ -235,7 +236,7 @@ The liquid specific heat capacity for each compound at standard pressure tempera
 Saturated vapor pressure
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.psat
+.. automethod:: FuelLib.groupContribution.psat
    :noindex:
 
 The saturated vapor pressure for each compound is calculated as a function of 
@@ -274,7 +275,7 @@ with :math:`\tau_i = 1 - T_{r,i}`.
 Surface tension
 ^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.surface_tension
+.. automethod:: FuelLib.groupContribution.surface_tension
    :noindex:
 
 Surface tension for each compound is approximated using the relation:
@@ -287,7 +288,7 @@ provided :math:`p_{c,i}` in bar.  The :math:`Q_i` term is defined by Brock and B
 .. math:: 
    Q_i = 0.1196 \bigg[1 + \frac{T_{r,b,i} \log(p_{c,i}/1.01325)}{1 - T_{r,b,i}}\bigg] - 0.279,
 
-or by Curl and Pitzer\ :footcite:p:`poling_properties_2001,curl_volumetric_1958,pitzer_thermodynamics_1995` as
+or by Curl and Pitzer\ :footcite:p:`poling_properties_2001` \ :footcite:p:`curl_volumetric_1958` \ :footcite:p:`pitzer_thermodynamics_1995` as
 
 .. math::
    Q_i = \frac{1.86 + 1.18 \omega_i}{19.05} \bigg[ \frac{3.75 + 0.91 \omega_i}{0.291 - 0.08\omega_i} \bigg]^{2/3}.
@@ -297,7 +298,7 @@ or by Curl and Pitzer\ :footcite:p:`poling_properties_2001,curl_volumetric_1958,
 Thermal conductivity
 ^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.thermal_conductivity
+.. automethod:: FuelLib.groupContribution.thermal_conductivity
    :noindex:
 
 Thermal conductivity for each compound is computed according to the method of 
@@ -384,11 +385,11 @@ are used throughout this section.
 Conventional mixing rules
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: GroupContributionMethod.mixingRule
+.. autofunction:: FuelLib.mixing_rule
    :noindex:
 
 While many of the mixture properties in FuelLib have a unique mixing rule,
-FuelLib's *mixingRule* function provides a general mixing rule based on the suggestions
+FuelLib's *mixing_rule* function provides a general mixing rule based on the suggestions
 of Harstad et al\ :footcite:p:`harstad_efficient_1997`. For a given property :math:`Q`
 
 .. math::
@@ -410,7 +411,7 @@ where :math:`Q_i` is the property of the *i-th* compound of the multicomponent m
 Mixture density
 ^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.mixture_density
+.. automethod:: FuelLib.groupContribution.mixture_density
    :noindex:
 
 The mixture's density is calculated as:
@@ -423,7 +424,7 @@ The mixture's density is calculated as:
 Mixture kinematic viscosity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.mixture_kinematic_viscosity
+.. automethod:: FuelLib.groupContribution.mixture_kinematic_viscosity
    :noindex:
 
 The kinematic viscosity of the mixture is computed using the Kendall-Monroe\ :footcite:p:`kendall_viscosity_1917` 
@@ -448,7 +449,7 @@ The Arrhenius rule is:
 Mixture vapor pressure
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.mixture_vapor_pressure
+.. automethod:: FuelLib.groupContribution.mixture_vapor_pressure
    :noindex:
 
 The vapor pressure of the mixture is calculated according to Raoult's law:
@@ -458,10 +459,27 @@ The vapor pressure of the mixture is calculated according to Raoult's law:
    p_{v} = \sum_{i = 1}^{N_c} X_i \, p_{\textit{sat},i}.
    \end{align*}
 
+.. automethod:: FuelLib.groupContribution.mixture_vapor_pressure_antoine_coeffs
+   :noindex:
+
+Users also have the option to return the coefficients from an Antoine fit based on 
+the mixture vapor pressure calculated from Raoult's law above.  Antoine's equation is:
+
+.. math:: 
+   \begin{align*}
+   \log_{10}(D \cdot p_{v}) = A - \frac{B}{C + T},
+   \end{align*}
+
+where :math:`D` is a conversion factor for converting :math:`p_v` to units of bar or dyne/cm :sup:`2` from Pa.
+This feature was added to provide `Pele <https://amrex-combustion.github.io>`_ users an option for estimating these coefficients for use in CFD
+simulations with spray. See the `PelePhysics documentation <https://amrex-combustion.github.io/PelePhysics/Spray.html>`_
+for additional information. 
+
+
 Mixture surface tension
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.mixture_surface_tension
+.. automethod:: FuelLib.groupContribution.mixture_surface_tension
    :noindex:
 
 The surface tension of the mixture is calculated using the :ref:`conventional-mixing-rules`
@@ -474,7 +492,7 @@ Hugill and van Welsenes\ :footcite:p:`hugill_surface_1986`:
 Mixture thermal conductivity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: GroupContributionMethod.groupContribution.mixture_thermal_conductivity
+.. automethod:: FuelLib.groupContribution.mixture_thermal_conductivity
    :noindex:
 
 The thermal conductivity of the mixture is calculated using the power law method of 
@@ -489,23 +507,29 @@ Validation
 Single Component Fuels
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: /figures/singleCompFuels.png
+.. figure:: /figures/singleCompFuels.png
    :width: 600pt
    :align: center
    
-Properties of decane, dodecane, and heptane.  Data from NIST Chemistry WebBook.
+   Properties of heptane, decane, and dodecane against predictive data from NIST Chemistry WebBook.
 
 Multi-Component Fuels
 ^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: /figures/multiCompFuels.png
+.. figure:: /figures/multiCompFuels.png
    :width: 600pt
    :align: center
 
-Properties of JP-8 (POSF10264), Jet A (POSF10325), and JP-5 (POSF10289) against data 
-from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`. Note that 
-the data sets for thermal conductivity are very inconsistent, but they typically show 
-linear decreases in thermal conductivity with temperature. 
+   Properties of conventional jet fuels JP-8 (POSF10264), Jet A (POSF10325), and JP-5 (POSF10289) against data from the Air Force Research Laboratory\ :footcite:p:`edwards_jet_2020`. Note that the data sets for thermal conductivity are very inconsistent, but they typically show linear decreases in thermal conductivity with temperature. 
+
+Fuel Blends
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. figure:: /figures/hefaBlends.png
+   :width: 250pt
+   :align: center
+   
+   Properties of three HEFA fuels produced from different feedstocks (camelina, tallow, and mixed fat) blended with Jet-A.  Measurement and GCxGC data from Vozka et al.\ :footcite:p:`vozka_impact_2018`. 
 
 
 References

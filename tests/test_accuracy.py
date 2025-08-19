@@ -10,8 +10,8 @@ class CompTestCase(unittest.TestCase):
 
     def test_accuracy(self):
         """Does the PR impact the accuracy of single component fuel predictions?"""
-        fuellib_dir = os.path.dirname(__file__)
-        baseline_dir = os.path.join(fuellib_dir, "fuelData/baselinePredictions")
+        test_dir = os.path.dirname(__file__)
+        baseline_dir = os.path.join(test_dir, "baselinePredictions")
 
         # Set the percentage for variation in max error
         max_error_diff = 1e-6
@@ -35,14 +35,6 @@ class CompTestCase(unittest.TestCase):
             "ThermalConductivity",
         ]
 
-        # droplet specs
-        drop = {}
-        drop["d_0"] = (
-            100 * 1e-6
-        )  # initial droplet diameter (m), note: size doesn't matter
-        drop["r_0"] = drop["d_0"] / 2.0  # initial droplet radius (m)
-        drop["V_0"] = 4.0 / 3.0 * np.pi * drop["r_0"] ** 3  # initial droplet volume
-
         # Compare to NIST predictions and previous model predictions
         for fuel_name in fuel_names:
 
@@ -60,7 +52,7 @@ class CompTestCase(unittest.TestCase):
                 sum_err_base += sum_err_base * max_error_diff
 
                 # Get predictions for current model
-                T, data, pred = fxns.getPredAndData(drop, fuel_name, prop)
+                T, data, pred = fxns.getPredAndData(fuel_name, prop)
                 err = np.abs(data - pred)
                 sum_err = np.sum(err)
 
