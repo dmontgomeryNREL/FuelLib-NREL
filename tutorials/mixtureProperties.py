@@ -7,7 +7,7 @@ import sys
 # Add the FuelLib directory to the Python path
 fuellib_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(fuellib_dir)
-import GroupContributionMethod as gcm
+import FuelLib as fl
 
 # -----------------------------------------------------------------------------
 # Calculate mixture properties from the group contribution properties
@@ -32,11 +32,6 @@ fsize = 18
 ticksize = 18
 line_thickness = 4
 marker_size = 75
-
-# droplet specs
-drop = {}
-drop["d_0"] = 100 * 1e-6  # initial droplet diameter (m), note: size doesn't matter
-drop["r_0"] = drop["d_0"] / 2.0  # initial droplet radius (m)
 
 
 # Line specifications for plotting
@@ -89,10 +84,7 @@ ylab = {
 
 def getPredAndData(fuel_name, prop_name):
     # Get the fuel properties based on the GCM
-    fuel = gcm.groupContribution(fuel_name)
-
-    # initial liquid mass fractions
-    Y_li = fuel.Y_0
+    fuel = fl.groupContribution(fuel_name)
 
     data_file = f"{fuel_name}.csv"
     dataPath = os.path.join(fuel.fuelDataDir, "propertiesData")
@@ -103,46 +95,36 @@ def getPredAndData(fuel_name, prop_name):
     prop_data = data[prop_name].dropna()
 
     # Vectors for temperature (convert from C to K)
-    T_pred = gcm.C2K(np.linspace(min(T_data), max(T_data), 100))
+    T_pred = fl.C2K(np.linspace(min(T_data), max(T_data), 100))
 
     # Vectors for density, viscosity and vapor pressure
     pred = np.zeros_like(T_pred)
 
-    if prop_name == "Density":
-        for i in range(0, len(T_pred)):
+    for i in range(0, len(T_pred)):
+        Y_li = fuel.Y_0
+
+        if prop_name == "Density":
             # Mixture density (returns rho in kg/m^3)
-            pred[i] = fuel.mixture_density(fuel.Y_0, T_pred[i])
+            pred[i] = fuel.mixture_density(Y_li, T_pred[i])
             # Convert density to CGS (g/cm^3)
             pred[i] *= 1.0e-03
 
-    if prop_name == "VaporPressure":
-        for i in range(0, len(T_pred)):
-            # Mass of the droplet at current temp
-            mass = gcm.drop_mass(fuel, drop["r_0"], Y_li, T_pred[i])
+        if prop_name == "VaporPressure":
             # Mixture vapor pressure (returns pv in Pa)
-            pred[i] = fuel.mixture_vapor_pressure(mass, T_pred[i])
+            pred[i] = fuel.mixture_vapor_pressure(Y_li, T_pred[i])
             # Convert vapor pressure to kPa
             pred[i] *= 1.0e-03
 
-    if prop_name == "Viscosity":
-        for i in range(0, len(T_pred)):
-            # Mass of the droplet at current temp
-            mass = gcm.drop_mass(fuel, drop["r_0"], Y_li, T_pred[i])
-            pred[i] = fuel.mixture_kinematic_viscosity(mass, T_pred[i])
+        if prop_name == "Viscosity":
+            pred[i] = fuel.mixture_kinematic_viscosity(Y_li, T_pred[i])
             # Convert viscosity to mm^2/s
             pred[i] *= 1.0e06
 
-    if prop_name == "SurfaceTension":
-        for i in range(0, len(T_pred)):
-            # Mass of the droplet at current temp
-            mass = gcm.drop_mass(fuel, drop["r_0"], Y_li, T_pred[i])
-            pred[i] = fuel.mixture_surface_tension(mass, T_pred[i])
+        if prop_name == "SurfaceTension":
+            pred[i] = fuel.mixture_surface_tension(Y_li, T_pred[i])
 
-    if prop_name == "ThermalConductivity":
-        for i in range(0, len(T_pred)):
-            # Mass of the droplet at current temp
-            mass = gcm.drop_mass(fuel, drop["r_0"], Y_li, T_pred[i])
-            pred[i] = fuel.mixture_thermal_conductivity(mass, T_pred[i])
+        if prop_name == "ThermalConductivity":
+            pred[i] = fuel.mixture_thermal_conductivity(Y_li, T_pred[i])
 
     return T_data, prop_data, T_pred, pred
 
@@ -158,7 +140,7 @@ for i in range(len(prop_names)):
 
         # Plot GCM predictions and data
         ax[i].plot(
-            gcm.K2C(T),
+            fl.K2C(T),
             pred,
             "-",
             color=line_color,
