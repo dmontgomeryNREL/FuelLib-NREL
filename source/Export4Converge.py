@@ -1,8 +1,15 @@
-import pandas as pd
-import numpy as np
 import os
+import sys
+import numpy as np
+import pandas as pd
 import argparse
 import FuelLib as fl
+
+# Add the FuelLib directory to the Python path
+FUELLIB_DIR = os.path.dirname(os.path.dirname(__file__))
+if FUELLIB_DIR not in sys.path:
+    sys.path.append(FUELLIB_DIR)
+from paths import *
 
 """
 Script that exports mixture properties over large temperature range for use in
@@ -25,28 +32,33 @@ Options:
 
 
 def export_converge(
-    fuel, path="mixturePropsGCM", units="mks", temp_min=0, temp_max=1000, temp_step=10
+    fuel,
+    path=os.path.join(FUELLIB_DIR, "exportData"),
+    units="mks",
+    temp_min=0,
+    temp_max=1000,
+    temp_step=10,
 ):
     """
     Export mixture fuel properties to .csv for Converge simulations.
 
-    :param fuel: An instance of the groupContribution class.
-    :type fuel: groupContribution object
+    :param fuel: An instance of the fuel class.
+    :type fuel: fuel object
 
     :param path: Directory to save the input file.
-    :type path: str, optional
+    :type path: str, optional (default: FuelLib/exportData)
 
     :param units: Units for the properties ("mks" for SI, "cgs" for CGS).
-    :type units: str, optional
+    :type units: str, optional (default: "mks")
 
     :param temp_min: Minimum temperature (K) for the property calculations.
-    :type temp_min: float, optional
+    :type temp_min: float, optional (default: 0)
 
     :param temp_max: Maximum temperature (K)for the property calculations.
-    :type temp_max: float, optional
+    :type temp_max: float, optional (default: 1000)
 
     :param temp_step: Step size for temperature (K).
-    :type temp_step: float, optional
+    :type temp_step: int, optional (default: 10)
 
     :return: None
     :rtype: None
@@ -247,7 +259,7 @@ def main():
     :param --temp_step: Step size for temperature (K) (optional, default: 10).
     :type --temp_step: float, optional
 
-    :param --export_dir: Directory to export the properties. Default is "sprayPropsGCM".
+    :param --export_dir: Directory to export the properties. Default is "FuelLib/exportData".
     :type --export_dir: str, optional
 
     :raises FileNotFoundError: If required files for the specified fuel are not found.
@@ -300,8 +312,8 @@ def main():
     # Optional argument for export directory
     parser.add_argument(
         "--export_dir",
-        default="mixturePropsGCM",
-        help="Directory to export the properties (optional, default: mixturePropsGCM).",
+        default=os.path.join(FUELLIB_DIR, "exportData"),
+        help="Directory to export the properties (optional, default: FuelLib/exportData).",
     )
 
     # Parse arguments
@@ -324,24 +336,20 @@ def main():
 
     # Check if necessary files exist in the fuelData directory
     print("\nChecking for required files...")
-    decomp_dir = os.path.join(
-        fl.groupContribution.fuelDataDir, "groupDecompositionData"
-    )
-    gcxgc_dir = os.path.join(fl.groupContribution.fuelDataDir, "gcData")
-    gcxgc_file = os.path.join(gcxgc_dir, f"{fuel_name}_init.csv")
-    decomp_file = os.path.join(decomp_dir, f"{fuel_name}.csv")
+    gcxgc_file = os.path.join(FUELDATA_GC_DIR, f"{fuel_name}_init.csv")
+    decomp_file = os.path.join(FUELDATA_DECOMP_DIR, f"{fuel_name}.csv")
     if not os.path.exists(gcxgc_file):
         raise FileNotFoundError(
-            f"GCXGC file for {fuel_name} not found in {gcxgc_dir}. gxcgc_file = {gcxgc_file}"
+            f"GCXGC file for {fuel_name} not found in {FUELDATA_GC_DIR}. gxcgc_file = {gcxgc_file}"
         )
     if not os.path.exists(decomp_file):
         raise FileNotFoundError(
-            f"Decomposition file for {fuel_name} not found in {decomp_dir}."
+            f"Decomposition file for {fuel_name} not found in {FUELDATA_DECOMP_DIR}."
         )
     print("All required files found.")
 
     # Create the groupContribution object for the specified fuel
-    fuel = fl.groupContribution(fuel_name)
+    fuel = fl.fuel(fuel_name)
 
     # Export properties for Pele
     export_converge(
@@ -350,6 +358,7 @@ def main():
         units=units,
         temp_min=temp_min,
         temp_max=temp_max,
+        temp_step=temp_step,
     )
 
     print("\nExport completed successfully!")

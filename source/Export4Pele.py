@@ -1,8 +1,15 @@
-import pandas as pd
-import numpy as np
 import os
+import sys
+import numpy as np
+import pandas as pd
 import argparse
 import FuelLib as fl
+
+# Add the FuelLib directory to the Python path
+FUELLIB_DIR = os.path.dirname(os.path.dirname(__file__))
+if FUELLIB_DIR not in sys.path:
+    sys.path.append(FUELLIB_DIR)
+from paths import *
 
 """
 Script that exports critical properties and initial mass fraction data
@@ -40,25 +47,29 @@ def vec_to_str(vec):
 
 
 def export_pele(
-    fuel, path="sprayPropsGCM", units="mks", dep_fuel_names=None, max_dep_fuels=30
+    fuel,
+    path=os.path.join(FUELLIB_DIR, "exportData"),
+    units="mks",
+    dep_fuel_names=None,
+    max_dep_fuels=30,
 ):
     """
     Export fuel properties to input file for Pele simulations.
 
-    :param fuel: An instance of the groupContribution class.
-    :type fuel: groupContribution object
+    :param fuel: An instance of the fuel class.
+    :type fuel: fuel object
 
     :param path: Directory to save the input file.
-    :type path: str, optional
+    :type path: str, optional (default: FuelLib/exportData)
 
     :param units: Units for the properties ("mks" for SI, "cgs" for CGS).
-    :type units: str, optional
+    :type units: str, optional (default: "mks")
 
     :param dep_fuel_names: List or single fuel that each compound deposits to.
-    :type dep_fuel_names: str, optional
+    :type dep_fuel_names: list of str, optional (default: None)
 
     :param max_dep_fuels: Maximum number of deposition fuels to consider.
-    :type max_dep_fuels: int, optional
+    :type max_dep_fuels: int, optional (default: 30)
 
     :return: None
     :rtype: None
@@ -143,11 +154,48 @@ def export_pele(
         "Lv_stp": ("latent", ["J/kg", "erg/g"]),
     }
 
+    # Get date and time for the header
+    from datetime import datetime
+
+    now = datetime.now()
+    dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Get git commit hash for the header
+    import subprocess
+
+    try:
+        git_commit = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .strip()
+            .decode("utf-8")
+        )
+    except Exception:
+        git_commit = "N/A"
+
+    # Get the remote url for the header
+    try:
+        git_remote = (
+            subprocess.check_output(["git", "config", "--get", "remote.origin.url"])
+            .strip()
+            .decode("utf-8")
+        )
+    except Exception:
+        git_remote = "N/A"
+
     # Write the properties to the input file
     print(f"Writing properties to {file_name}...")
     if os.path.exists(file_name):
         os.remove(file_name)
     with open(file_name, "a") as f:
+        f.write(
+            f"# -----------------------------------------------------------------------------\n"
+            f"# sprayPropsGCM_{fuel.name}.inp\n"
+            f"# Generated on {dt_string}\n"
+            f"# FuelLib remote URL: {git_remote}\n"
+            f"# Git commit: {git_commit}\n"
+            f"# Units: {units.upper()}\n"
+            f"# -----------------------------------------------------------------------------\n\n"
+        )
         f.write(f"particles.spray_fuel_num = {len(fuel.compounds)}\n")
         f.write(f"particles.fuel_species = {vec_to_str(df['Compound'].tolist())}\n")
         f.write(f"particles.Y_0 = {vec_to_str(df['Y_0'].tolist())}\n")
@@ -200,7 +248,7 @@ def main():
     :param --max_dep_fuels: Maximum number of deposition fuels to consider. Default is 30.
     :type --max_dep_fuels: int, optional
 
-    :param --export_dir: Directory to export the properties. Default is "sprayPropsGCM".
+    :param --export_dir: Directory to export the properties. Default is "FuelLib/exportData".
     :type --export_dir: str, optional
 
     :raises FileNotFoundError: If required files for the specified fuel are not found.
@@ -245,8 +293,8 @@ def main():
     # Optional argument for export directory
     parser.add_argument(
         "--export_dir",
-        default="sprayPropsGCM",
-        help="Directory to export the properties (optional, default: sprayPropsGCM).",
+        default=os.path.join(FUELLIB_DIR, "exportData"),
+        help="Directory to export the properties (optional, default: FuelLib/exportData).",
     )
 
     # Parse arguments
@@ -265,24 +313,20 @@ def main():
 
     # Check if necessary files exist in the fuelData directory
     print("\nChecking for required files...")
-    decomp_dir = os.path.join(
-        fl.groupContribution.fuelDataDir, "groupDecompositionData"
-    )
-    gcxgc_dir = os.path.join(fl.groupContribution.fuelDataDir, "gcData")
-    gcxgc_file = os.path.join(gcxgc_dir, f"{fuel_name}_init.csv")
-    decomp_file = os.path.join(decomp_dir, f"{fuel_name}.csv")
+    gcxgc_file = os.path.join(FUELDATA_GC_DIR, f"{fuel_name}_init.csv")
+    decomp_file = os.path.join(FUELDATA_DECOMP_DIR, f"{fuel_name}.csv")
     if not os.path.exists(gcxgc_file):
         raise FileNotFoundError(
-            f"GCXGC file for {fuel_name} not found in {gcxgc_dir}. gxcgc_file = {gcxgc_file}"
+            f"GCXGC file for {fuel_name} not found in {FUELDATA_GC_DIR}. gxcgc_file = {gcxgc_file}"
         )
     if not os.path.exists(decomp_file):
         raise FileNotFoundError(
-            f"Decomposition file for {fuel_name} not found in {decomp_dir}."
+            f"Decomposition file for {fuel_name} not found in {FUELDATA_DECOMP_DIR}."
         )
     print("All required files found.")
 
     # Create the groupContribution object for the specified fuel
-    fuel = fl.groupContribution(fuel_name)
+    fuel = fl.fuel(fuel_name)
 
     # Export properties for Pele
     export_pele(

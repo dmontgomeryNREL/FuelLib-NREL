@@ -1,8 +1,7 @@
-Properties and Model Equations
+Fuel Property Prediction Model
 ==============================
 
-The **Fuel Library** for advanced research on evaporation **(FuelLib)** utilizes
-the group contribution method (GCM), as developed by Constantinou and 
+**FuelLib** utilizes the group contribution method (GCM), as developed by Constantinou and 
 Gani\ :footcite:p:`constantinou_new_1994` \ :footcite:p:`constantinou_estimation_1995` in the mid-1990s, 
 to provide a systematic approach for estimating the thermodynamic properties of
 pure organic compounds. The GCM decomposes molecules into structural groups, 
@@ -64,28 +63,26 @@ by Constantinou and Gani\ :footcite:p:`constantinou_new_1994,constantinou_estima
 Similarly, let :math:`\mathbf{M}` be an :math:`N_c \times N_{g_2}` matrix that specifies 
 the number of second-order groups in each compound, where :math:`N_{g_2}` is the total 
 number of second-order groups. The total number of groups :math:`N_g = N_{g_1} + N_{g_2} = 121`. 
-Define a parameter :math:`W` such that :math:`W = 0` performs a first-order group only 
-calculation, while :math:`W = 1` includes second-order groups. The GCM properties for 
-the *i-th* compound in the mixture are calculated as 
+The GCM properties for the *i-th* compound in the mixture are calculated as 
 follows\ :footcite:p:`constantinou_new_1994` \ :footcite:p:`constantinou_estimation_1995` \ :footcite:p:`poling_properties_2001`:
 
 .. math::
 
    \begin{align*}
     M_{w,i} &= \bigg[\sum_{k = 1}^{N_{g_1}}\mathbf{N}_{ik}m_{w1k} \bigg] \times 10^{-3}, \\
-    T_{c,i} &= 181.28 \ln  \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} t_{c1k} + W \sum_{j=1}^{N_{g_2}}         \mathbf{M}_{ij} t_{c2j} \bigg],\\
-    p_{c,i} &= \Bigg( \bigg[  \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} p_{c1k} + W \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij}     p_{c2j} + 0.10022\bigg]^{-2}  + 1.3705\Bigg)\times 10^{5}, \label{eq:gcm-pc}\\
-    V_{c,i} &= \Bigg( \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} v_{c1k} + W \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij}      v_{c2j} \bigg] -0.00435 \Bigg)\times 10^{-3}, \\
-    T_{b,i} &= 204.359 \ln  \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} t_{b1k} + W \sum_{j=1}^{N_{g_2}}      \mathbf{M}_{ij} t_{b2j}\bigg],\\
-    T_{m,i} &= 102.425 \ln  \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} t_{m1k} + W \sum_{j=1}^{N_{g_2}}      \mathbf{M}_{ij} t_{m2j}\bigg],\\
-    \Delta H_{f,i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} h_{f1k} + W \sum_{j=1}^{N_{g_2}}     \mathbf{M}_{ij} h_{f2j} \bigg] + 10.835\Bigg) \times 10^3,\\
-    \Delta G_{f,i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} g_{f1k} + W \sum_{j=1}^{N_{g_2}}     \mathbf{M}_{ij} g_{f2j} \bigg] -14.828 \Bigg) \times 10^3,\\
-    \Delta H_{v,\textit{stp},i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} h_{v1k} + W                      \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} h_{v2j} \bigg] + 6.829\Bigg) \times 10^3, \\
-    \omega_i &= 0.4085 \ln  \bigg( \Big[  \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} \omega_{1k} + W                  \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} \omega_{2j} + 1.1507\Big]^{1/0.5050} \bigg), \label{eq:gcm-omega}\\
-    V_{m,\textit{stp},i} &= \Bigg( \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} v_{m1k} + W \sum_{j=1}^{N_{g_2}}          \mathbf{M}_{ij} v_{m2j} \bigg] + 0.01211 \Bigg)\times 10^{-3}, \\
-    C_{p,i} & =\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pA1_k} + W \sum_{j=1}^{N_{g_2}}                \mathbf{M}_{ij} C_{pA2_j} -19.7779\bigg]  \nonumber \\
-        & +\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pB1_k} + W \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} C_{pB2_j} + 22.5981\bigg] \theta \nonumber\\
-        & +\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pC1_k} + W \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} C_{pC2_j} - 10.7983\bigg] \theta^2 \\
+    T_{c,i} &= 181.28 \ln  \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} t_{c1k} + \sum_{j=1}^{N_{g_2}}         \mathbf{M}_{ij} t_{c2j} \bigg],\\
+    p_{c,i} &= \Bigg( \bigg[  \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} p_{c1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij}     p_{c2j} + 0.10022\bigg]^{-2}  + 1.3705\Bigg)\times 10^{5}, \label{eq:gcm-pc}\\
+    V_{c,i} &= \Bigg( \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} v_{c1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij}      v_{c2j} \bigg] -0.00435 \Bigg)\times 10^{-3}, \\
+    T_{b,i} &= 204.359 \ln  \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} t_{b1k} + \sum_{j=1}^{N_{g_2}}  \mathbf{M}_{ij} t_{b2j}\bigg],\\
+    T_{m,i} &= 102.425 \ln  \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} t_{m1k} + \sum_{j=1}^{N_{g_2}}  \mathbf{M}_{ij} t_{m2j}\bigg],\\
+    \Delta H_{f,i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} h_{f1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} h_{f2j} \bigg] + 10.835\Bigg) \times 10^3,\\
+    \Delta G_{f,i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} g_{f1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} g_{f2j} \bigg] -14.828 \Bigg) \times 10^3,\\
+    \Delta H_{v,\textit{stp},i} &= \Bigg( \bigg[ \sum_{k = 1}^{N_{g_1}} \mathbf{N}_{ik} h_{v1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} h_{v2j} \bigg] + 6.829\Bigg) \times 10^3, \\
+    \omega_i &= 0.4085 \ln  \bigg( \Big[  \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} \omega_{1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} \omega_{2j} + 1.1507\Big]^{1/0.5050} \bigg), \label{eq:gcm-omega}\\
+    V_{m,\textit{stp},i} &= \Bigg( \bigg[ \sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} v_{m1k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} v_{m2j} \bigg] + 0.01211 \Bigg)\times 10^{-3}, \\
+    C_{p,i} & =\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pA1_k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} C_{pA2_j} -19.7779\bigg]  \nonumber \\
+        & +\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pB1_k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} C_{pB2_j} + 22.5981\bigg] \theta \nonumber\\
+        & +\bigg[\sum_{k=1}^{N_{g_1}} \mathbf{N}_{ik} C_{pC1_k} + \sum_{j=1}^{N_{g_2}} \mathbf{M}_{ij} C_{pC2_j} - 10.7983\bigg] \theta^2 \\
     \theta &= \frac{T - 298.15}{700}
     \end{align*}
 
@@ -143,7 +140,7 @@ provided :math:`T` in K unless noted otherwise.
 Kinematic viscosity
 ^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.viscosity_kinematic
+.. automethod:: FuelLib.fuel.viscosity_kinematic
    :noindex:
 
 The kinematic viscosity of the *i-th* compound of the fuel, 
@@ -166,7 +163,7 @@ Liquids\ :footcite:p:`viswanath_viscosity_2007`) provided :math:`T` in :math:`^{
 Latent heat of vaporization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.latent_heat_vaporization
+.. automethod:: FuelLib.fuel.latent_heat_vaporization
    :noindex:
 
 The latent heat of vaporization for each compound at standard pressure and 
@@ -185,7 +182,7 @@ temperature\ :footcite:p:`govindaraju_group_2016`:
 Liquid molar volume
 ^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.molar_liquid_vol
+.. automethod:: FuelLib.fuel.molar_liquid_vol
    :noindex:
 
 The liquid molar volume is calculated at a specific temperature :math:`T` using 
@@ -211,7 +208,7 @@ where
 Density
 ^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.density
+.. automethod:: FuelLib.fuel.density
    :noindex:
 
 The density of the *i-th* compound is given by
@@ -223,7 +220,7 @@ The density of the *i-th* compound is given by
 Liquid specific heat capacity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.Cl
+.. automethod:: FuelLib.fuel.Cl
    :noindex:
 
 The liquid specific heat capacity for each compound at standard pressure temperature is calculated from the specific heat capacity as:
@@ -236,7 +233,7 @@ The liquid specific heat capacity for each compound at standard pressure tempera
 Saturated vapor pressure
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.psat
+.. automethod:: FuelLib.fuel.psat
    :noindex:
 
 The saturated vapor pressure for each compound is calculated as a function of 
@@ -275,7 +272,7 @@ with :math:`\tau_i = 1 - T_{r,i}`.
 Surface tension
 ^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.surface_tension
+.. automethod:: FuelLib.fuel.surface_tension
    :noindex:
 
 Surface tension for each compound is approximated using the relation:
@@ -298,7 +295,7 @@ or by Curl and Pitzer\ :footcite:p:`poling_properties_2001` \ :footcite:p:`curl_
 Thermal conductivity
 ^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.thermal_conductivity
+.. automethod:: FuelLib.fuel.thermal_conductivity
    :noindex:
 
 Thermal conductivity for each compound is computed according to the method of 
@@ -411,7 +408,7 @@ where :math:`Q_i` is the property of the *i-th* compound of the multicomponent m
 Mixture density
 ^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.mixture_density
+.. automethod:: FuelLib.fuel.mixture_density
    :noindex:
 
 The mixture's density is calculated as:
@@ -424,7 +421,7 @@ The mixture's density is calculated as:
 Mixture kinematic viscosity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.mixture_kinematic_viscosity
+.. automethod:: FuelLib.fuel.mixture_kinematic_viscosity
    :noindex:
 
 The kinematic viscosity of the mixture is computed using the Kendall-Monroe\ :footcite:p:`kendall_viscosity_1917` 
@@ -449,7 +446,7 @@ The Arrhenius rule is:
 Mixture vapor pressure
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.mixture_vapor_pressure
+.. automethod:: FuelLib.fuel.mixture_vapor_pressure
    :noindex:
 
 The vapor pressure of the mixture is calculated according to Raoult's law:
@@ -459,7 +456,7 @@ The vapor pressure of the mixture is calculated according to Raoult's law:
    p_{v} = \sum_{i = 1}^{N_c} X_i \, p_{\textit{sat},i}.
    \end{align*}
 
-.. automethod:: FuelLib.groupContribution.mixture_vapor_pressure_antoine_coeffs
+.. automethod:: FuelLib.fuel.mixture_vapor_pressure_antoine_coeffs
    :noindex:
 
 Users also have the option to return the coefficients from an Antoine fit based on 
@@ -479,7 +476,7 @@ for additional information.
 Mixture surface tension
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.mixture_surface_tension
+.. automethod:: FuelLib.fuel.mixture_surface_tension
    :noindex:
 
 The surface tension of the mixture is calculated using the :ref:`conventional-mixing-rules`
@@ -492,7 +489,7 @@ Hugill and van Welsenes\ :footcite:p:`hugill_surface_1986`:
 Mixture thermal conductivity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automethod:: FuelLib.groupContribution.mixture_thermal_conductivity
+.. automethod:: FuelLib.fuel.mixture_thermal_conductivity
    :noindex:
 
 The thermal conductivity of the mixture is calculated using the power law method of 

@@ -1,10 +1,17 @@
-import pandas as pd
-import numpy as np
-from scipy.optimize import curve_fit
 import os
+import sys
+import numpy as np
+import pandas as pd
+from scipy.optimize import curve_fit
+
+# Add the FuelLib directory to the Python path
+FUELLIB_DIR = os.path.dirname(os.path.dirname(__file__))
+if FUELLIB_DIR not in sys.path:
+    sys.path.append(FUELLIB_DIR)
+from paths import *
 
 
-class groupContribution:
+class fuel:
     """
     Class for handling group contribution calculations of thermodynamic and mixture properties.
 
@@ -12,19 +19,9 @@ class groupContribution:
     :type name: str
     :param decompName: Name of the groupDecomposition file if different from name. Defaults to None.
     :type decompName: str, optional
-    :param W: Determines whether to use first-order only approximation (W = 0). Defaults to 1.
-    :type W: int
+    :param fuelDataDir: Directory where the fuel data is stored. Defaults to FuelLib/fuelData.
+    :type fuelDataDir: str, optional
     """
-
-    # Paths to input directories
-    fuellibDir = os.path.dirname(os.path.abspath(__file__))
-    gcmTableDir = os.path.join(fuellibDir, "gcmTableData")
-    fuelDataDir = os.path.join(fuellibDir, "fuelData")
-    groupDecompDir = os.path.join(fuelDataDir, "groupDecompositionData")
-    gcxgcDir = os.path.join(fuelDataDir, "gcData")
-
-    # Path to GCM table
-    gcmTableFile = os.path.join(gcmTableDir, "gcmTable.csv")
 
     # Number of first and second order groups from Constantinou and Gani
     N_g1 = 78
@@ -33,18 +30,30 @@ class groupContribution:
     # Boltzmann's constant J/K
     k_B = 1.380649e-23
 
-    def __init__(self, name, decompName=None, W=1):
+    def __init__(self, name, decompName=None, fuelDataDir=FUELDATA_DIR):
         # Initializes the composition and calculates the GCM properties for the
         # specified mixture.
 
         self.name = name
         if decompName is None:
             decompName = name
-        groupDecompFile = os.path.join(self.groupDecompDir, f"{decompName}.csv")
-        gcxgcFile = os.path.join(self.gcxgcDir, f"{name}_init.csv")
+        if fuelDataDir != FUELDATA_DIR:
+            self.fuelDataDir = fuelDataDir
+            self.fuelDataGcDir = os.path.join(self.fuelDataDir, "gcData")
+            self.fuelDataDecompDir = os.path.join(
+                self.fuelDataDir, "groupDecompositionData"
+            )
+        else:
+            self.fuelDataDir = FUELDATA_DIR
+            self.fuelDataGcDir = FUELDATA_GC_DIR
+            self.fuelDataDecompDir = FUELDATA_DECOMP_DIR
+
+        self.groupDecompFile = os.path.join(self.fuelDataDecompDir, f"{decompName}.csv")
+        self.gcxgcFile = os.path.join(self.fuelDataGcDir, f"{name}_init.csv")
+        self.gcmTableFile = os.path.join(GCMTABLE_DIR, "gcmTable.csv")
 
         # Read functional group data for mixture (num_compounds,num_groups)
-        df_Nij = pd.read_csv(groupDecompFile)
+        df_Nij = pd.read_csv(self.groupDecompFile)
         self.Nij = df_Nij.iloc[:, 1:].to_numpy()
         self.num_compounds = self.Nij.shape[0]
         self.num_groups = self.Nij.shape[1]
@@ -73,7 +82,7 @@ class groupContribution:
                 self.fam[i] = 3
 
         # Read initial liquid composition of mixture and normalize to get mass frac
-        df_gcxgc = pd.read_csv(gcxgcFile)
+        df_gcxgc = pd.read_csv(self.gcxgcFile)
         self.compounds = df_gcxgc.iloc[:, 0].to_list()
         self.Y_0 = df_gcxgc.iloc[:, 1].to_numpy().flatten().astype(float)
         self.Y_0 /= np.sum(self.Y_0)
@@ -82,43 +91,41 @@ class groupContribution:
         if self.num_groups < self.N_g1:
             raise ValueError(
                 f"Insufficient mixture description:\n"
-                f"The number of columns in {groupDecompFile} is less than "
+                f"The number of columns in {self.groupDecompFile} is less than "
                 f"the required number of first-order groups (N_g1 = {self.N_g1})."
             )
         if self.Y_0.shape[0] != self.num_compounds:
             raise ValueError(
                 f"Insufficient mixture description:\n"
-                f"The number of compounds in {groupDecompFile} does not "
-                f"equal the number of compounds in {gcxgcFile}."
+                f"The number of compounds in {self.groupDecompFile} does not "
+                f"equal the number of compounds in {self.gcxgcFile}."
             )
 
         # Read and store GCM table properties
-        df_gcm_properties = pd.read_csv(self.gcmTableFile)
-        gcm_properties = df_gcm_properties.loc[
-            :, ~df_gcm_properties.columns.isin(["Property", "Units"])
-        ].to_numpy()
+        df_table = pd.read_csv(self.gcmTableFile)
+        df_table = df_table.drop(columns=["Units"])
 
-        # Determine if approximations include second-order contributions
-        if W == 0 or self.num_groups < self.N_g1 + self.N_g2:
-            # Only retain first-order GCM properties
-            gcm_properties = gcm_properties[:, 0 : self.N_g1]
-            self.Nij = self.Nij[:, 0 : self.N_g1]
+        def get_row(property_name):
+            row = df_table[df_table["Property"] == property_name]
+            if row.empty:
+                raise ValueError(f"Property '{property_name}' not found in GCM table.")
+            return row.iloc[:, 1:].to_numpy().flatten()
 
         # Table data for functional groups (num_compounds,)
-        Tck = gcm_properties[0]  # critical temperature (1)
-        Pck = gcm_properties[1]  # critical pressure (bar)
-        Vck = gcm_properties[2]  # critical volume (m^3/kmol)
-        Tbk = gcm_properties[3]  # boiling temperature (1)
-        Tmk = gcm_properties[4]  # melting point temperature (1)
-        hfk = gcm_properties[5]  # enthalpy of formation, (kJ/mol)
-        gfk = gcm_properties[6]  # Gibbs energy (kJ/mol)
-        hvk = gcm_properties[7]  # latent heat of vaporization (kJ/mol)
-        wk = gcm_properties[8]  # accentric factor (1)
-        Vmk = gcm_properties[9]  # liquid molar volume fraction (m^3/kmol)
-        cpak = gcm_properties[10]  # specific heat values (J/mol/K)
-        cpbk = gcm_properties[11]  # specific heat values (J/mol/K)
-        cpck = gcm_properties[12]  # specific heat values (J/mol/K)
-        mwk = gcm_properties[13]  # molecular weights (g/mol)
+        Tck = get_row("tck")  # critical temperature (1)
+        Pck = get_row("pck")  # critical pressure (bar)
+        Vck = get_row("vck")  # critical volume (m^3/kmol)
+        Tbk = get_row("tbk")  # boiling temperature (1)
+        Tmk = get_row("tmk")  # melting point temperature (1)
+        hfk = get_row("hfk")  # enthalpy of formation, (kJ/mol)
+        gfk = get_row("gfk")  # Gibbs energy (kJ/mol)
+        hvk = get_row("hvk")  # latent heat of vaporization (kJ/mol)
+        wk = get_row("wk")  # accentric factor (1)
+        Vmk = get_row("vmk")  # liquid molar volume fraction (m^3/kmol)
+        cpak = get_row("CpAk")  # specific heat values (J/mol/K)
+        cpbk = get_row("CpBk")  # specific heat values (J/mol/K)
+        cpck = get_row("CpCk")  # specific heat values (J/mol/K)
+        mwk = get_row("MW")  # molecular weights (g/mol)
 
         # --- Compute critical properties at standard temp (num_compounds,)
         # Molecular weights
