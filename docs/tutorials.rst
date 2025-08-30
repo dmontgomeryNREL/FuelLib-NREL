@@ -140,19 +140,20 @@ From the ``FuelLib`` directory, run the following command in the terminal, notin
 This generates the following input file, ``FuelLib/exportData/sprayPropsGCM_heptane-decane.inp``, for use in a PeleLMeX simulation: ::
 
     # -----------------------------------------------------------------------------
-    # sprayPropsGCM_heptane-decane.inp
-    # Generated on <YYY-MM-DD> <HH-MM-SS>
+    # Liquid fuel properties for GCM in Pele
+    # Fuel: heptane-decane
+    # Generated: <YYY-MM-DD> <HH-MM-SS>
     # FuelLib remote URL: https://github.com/NREL/FuelLib.git
     # Git commit: <commit-hash>
     # Units: MKS
     # -----------------------------------------------------------------------------
 
-    particles.spray_fuel_num = 2
     particles.fuel_species = NC7H16 NC10H22
     particles.Y_0 = 0.7375 0.2625
-    particles.dep_fuel_names = NC7H16 NC10H22
+    particles.dep_fuel_species = NC7H16 NC10H22
 
     # Properties for NC7H16 in MKS
+    particles.NC7H16_family = 0 # saturated hydrocarbons
     particles.NC7H16_molar_weight = 0.100000 # kg/mol
     particles.NC7H16_crit_temp = 549.855981 # K
     particles.NC7H16_crit_press = 2821129.514417 # Pa
@@ -160,10 +161,13 @@ This generates the following input file, ``FuelLib/exportData/sprayPropsGCM_hept
     particles.NC7H16_boil_temp = 379.073212 # K
     particles.NC7H16_acentric_factor = 0.336945 # -
     particles.NC7H16_molar_vol = 0.000146 # m^3/mol
-    particles.NC7H16_cp = 1636.255 3046.5109999999995 -983.6289999999999 # J/kg/K
+    particles.NC7H16_cp_a = 1636.255000 # J/kg/K
+    particles.NC7H16_cp_b = 3046.511000 # J/kg/K
+    particles.NC7H16_cp_c = -983.629000 # J/kg/K
     particles.NC7H16_latent = 383110.000000 # J/kg
 
     # Properties for NC10H22 in MKS
+    particles.NC10H22_family = 0 # saturated hydrocarbons
     particles.NC10H22_molar_weight = 0.142000 # kg/mol
     particles.NC10H22_crit_temp = 623.690516 # K
     particles.NC10H22_crit_press = 2115522.932445 # Pa
@@ -171,7 +175,9 @@ This generates the following input file, ``FuelLib/exportData/sprayPropsGCM_hept
     particles.NC10H22_boil_temp = 452.596977 # K
     particles.NC10H22_acentric_factor = 0.468050 # -
     particles.NC10H22_molar_vol = 0.000196 # m^3/mol
-    particles.NC10H22_cp = 1630.488028169014 3098.1056338028166 -1024.456338028169 # J/kg/K
+    particles.NC10H22_cp_a = 1630.488028 # J/kg/K
+    particles.NC10H22_cp_b = 3098.105634 # J/kg/K
+    particles.NC10H22_cp_c = -1024.456338 # J/kg/K
     particles.NC10H22_latent = 368035.211268 # J/kg
 
 To include these parameters in your Pele simulation, copy the ``sprayPropsGCM_heptane-decane.inp`` 
