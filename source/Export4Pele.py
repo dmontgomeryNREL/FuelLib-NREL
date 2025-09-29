@@ -17,8 +17,9 @@ Script that exports critical properties and initial mass fraction data
 for use in Pele simulations.
 
 This script is designed to be run from the command line and will create
-a file named "sprayPropsGCM_<fuel_name>.inp" in the specified directory.
-The file contains properties for each compound in the fuel, formatted for Pele.
+a file named "sprayPropsGCM_<fuel_name>.inp" or "sprayPropsMP_<fuel_name>.inp"
+in the specified directory. The file contains properties for each compound in 
+the fuel, formatted for Pele.
 
 Usage:
     python Export4Pele.py --fuel_name <fuel_name>
@@ -26,10 +27,12 @@ Usage:
 Options:
         --units <mks or cgs>
         --dep_fuel_names <list of fuels to deposit to>
-        --max_dep_fuels <max number of dep fuels>
         --export_dir <directory where file is exported>
         --export_mix <0 or 1 to export mixture properties of fuel>
         --export_mix_name <name the mixture if different than fuel_name>
+        --fuel_data_dir <directory where fuel data files are located>
+        --liq_prop_model <gcm or mp>
+        --psat_antoine <True or False for Antoine coefficients in MP model>
 """
 
 
@@ -54,9 +57,10 @@ def export_pele(
     path=os.path.join(FUELLIB_DIR, "exportData"),
     units="mks",
     dep_fuel_names=None,
-    max_dep_fuels=30,
     export_mix=False,
     export_mix_name=None,
+    liq_prop_model="gcm",
+    psat_antoine=True,
 ):
     """
     Export fuel properties to input file for Pele simulations.
@@ -73,14 +77,17 @@ def export_pele(
     :param dep_fuel_names: List or single fuel that each compound deposits to.
     :type dep_fuel_names: list of str, optional (default: None)
 
-    :param max_dep_fuels: Maximum number of deposition fuels to consider.
-    :type max_dep_fuels: int, optional (default: 30)
-
     :param export_mix: Option to export mixture properties of the fuel (True or False).
     :type export_mix: bool, optional (default: False)
 
     :param export_mix_name: Name the mixture if different than fuel_name.
     :type export_mix_name: str, optional (default: None)
+
+    :param liq_prop_model: Model for liquid properties. Options are "gcm" (default) or "mp".
+    :type liq_prop_model: str, optional (default: "gcm")
+
+    :param psat_antoine: Use Antoine coefficients for vapor pressure in MP model (True or False). Default is True.
+    :type psat_antoine: bool, optional
 
     :return: None
     :rtype: None
@@ -90,10 +97,24 @@ def export_pele(
         os.makedirs(path)
 
     # Name of the input file
-    if not export_mix:
-        file_name = os.path.join(path, f"sprayPropsGCM_{fuel.name}.inp")
-    else:
-        file_name = os.path.join(path, f"sprayPropsGCM_mixture_{fuel.name}.inp")
+    if liq_prop_model.lower() == "gcm":
+        if not export_mix:
+            file_name = os.path.join(path, f"sprayPropsGCM_{fuel.name}.inp")
+        else:
+            file_name = os.path.join(path, f"sprayPropsGCM_mixture_{fuel.name}.inp")
+    else:  # mp method
+        if not export_mix:
+            file_name = os.path.join(path, f"sprayPropsMP_{fuel.name}.inp")
+        else:
+            file_name = os.path.join(path, f"sprayPropsMP_mixture_{fuel.name}.inp")
+
+    # Check there are no spaces in fuel.compounds
+    for compound in fuel.compounds:
+        if " " in compound:
+            raise ValueError(
+                f"Pele cannot accept compounds with spaces. "
+                f"Compound '{compound}' contains spaces. Use a '-' instead."
+            )
 
     # Unit conversion factors:
     if units.lower() == "cgs":
@@ -116,13 +137,7 @@ def export_pele(
         )
         # If dep_fuel_names is not provided, use fuel.compounds
         if dep_fuel_names is None:
-            if len(fuel.compounds) <= max_dep_fuels:
-                # If no deposition fuel names are provided, use the compounds as deposition fuels
-                dep_fuel_names = fuel.compounds
-            else:
-                # If more than max_dep_fuels, deposit all compoudns to fuel.name.upper()
-                # This assumes a POSF fuel with a single deposition fuel
-                dep_fuel_names = [fuel.name.upper()] * len(fuel.compounds)
+            dep_fuel_names = fuel.compounds
         elif len(dep_fuel_names) == 1:
             # If a single deposition fuel name is provided, use it for all compounds
             dep_fuel_names = [dep_fuel_names[0]] * len(fuel.compounds)
@@ -197,36 +212,75 @@ def export_pele(
             }
         )
 
-    # Get the property names
-    prop_names = [
-        "Family",
-        "MW",
-        "Tc",
-        "Pc",
-        "Vc",
-        "Tb",
-        "omega",
-        "Vm_stp",
-        "Cp_stp",
-        "Cp_B",
-        "Cp_C",
-        "Lv_stp",
-    ]
+    # Specific properties required for GCM method
+    if liq_prop_model.lower() == "gcm":
+        # Get the property names
+        prop_names = [
+            "Family",
+            "MW",
+            "Tc",
+            "Pc",
+            "Vc",
+            "Tb",
+            "omega",
+            "Vm_stp",
+            "Cp_stp",
+            "Cp_B",
+            "Cp_C",
+            "Lv_stp",
+        ]
 
-    formatted_names = {
-        "Family": ("family", ["", ""]),
-        "MW": ("molar_weight", ["kg/mol", "g/mol"]),
-        "Tc": ("crit_temp", ["K", "K"]),
-        "Pc": ("crit_press", ["Pa", "dyne/cm^2"]),
-        "Vc": ("crit_vol", ["m^3/mol", "cm^3/mol"]),
-        "Tb": ("boil_temp", ["K", "K"]),
-        "omega": ("acentric_factor", ["-", "-"]),
-        "Vm_stp": ("molar_vol", ["m^3/mol", "cm^3/mol"]),
-        "Cp_stp": ("cp_a", ["J/kg/K", "erg/g/K"]),
-        "Cp_B": ("cp_b", ["J/kg/K", "erg/g/K"]),
-        "Cp_C": ("cp_c", ["J/kg/K", "erg/g/K"]),
-        "Lv_stp": ("latent", ["J/kg", "erg/g"]),
-    }
+        formatted_names = {
+            "Family": ("family", ["", ""]),
+            "MW": ("molar_weight", ["kg/mol", "g/mol"]),
+            "Tc": ("crit_temp", ["K", "K"]),
+            "Pc": ("crit_press", ["Pa", "dyne/cm^2"]),
+            "Vc": ("crit_vol", ["m^3/mol", "cm^3/mol"]),
+            "Tb": ("boil_temp", ["K", "K"]),
+            "omega": ("acentric_factor", ["-", "-"]),
+            "Vm_stp": ("molar_vol", ["m^3/mol", "cm^3/mol"]),
+            "Cp_stp": ("cp_a", ["J/kg/K", "erg/g/K"]),
+            "Cp_B": ("cp_b", ["J/kg/K", "erg/g/K"]),
+            "Cp_C": ("cp_c", ["J/kg/K", "erg/g/K"]),
+            "Lv_stp": ("latent", ["J/kg", "erg/g"]),
+        }
+    else:  # mp method
+        prop_names = ["Tc", "Tb", "Lv_stp", "Cp_stp", "rho"]
+        if psat_antoine:
+            prop_names.append("psat")
+
+        formatted_names = {
+            "Tc": ("crit_temp", ["K", "K"]),
+            "Tb": ("boil_temp", ["K", "K"]),
+            "Lv_stp": ("latent", ["J/kg", "erg/g"]),
+            "Cp_stp": ("cp", ["J/kg/K", "erg/g/K"]),
+            "rho": ("rho", ["kg/m^3", "g/cm^3"]),
+            "psat": ("psat", ["Pa", "dyne/cm^2"]),
+        }
+
+        # Calculate density at 298.15 K
+        ref_T = 298.15
+        if export_mix:
+            rho = fuel.mixture_density(fuel.Y_0, ref_T)
+        else:
+            rho = fuel.density(ref_T)
+        df["rho"] = rho
+
+        # Get Antoine coefficients
+        if psat_antoine:
+            if export_mix:
+                psat_A, psat_B, psat_C, psat_D = (
+                    fuel.mixture_vapor_pressure_antoine_coeffs(fuel.Y_0, units=units)
+                )
+                rho = fuel.mixture_density(fuel.Y_0, ref_T)
+            else:
+                psat_A, psat_B, psat_C, psat_D = fuel.psat_antoine_coeffs(units=units)
+                rho = fuel.density(ref_T)
+
+            df["psat_A"] = psat_A
+            df["psat_B"] = psat_B
+            df["psat_C"] = psat_C
+            df["psat_D"] = psat_D
 
     # Get date and time for the header
     from datetime import datetime
@@ -263,7 +317,7 @@ def export_pele(
     with open(file_name, "a") as f:
         f.write(
             f"# -----------------------------------------------------------------------------\n"
-            f"# Liquid fuel properties for GCM in Pele\n"
+            f"# Liquid fuel properties for {liq_prop_model.upper()} in Pele\n"
             f"# Fuel: {fuel.name}\n"
             f"# Number of compounds: {len(fuel.compounds)}\n"
             f"# Generated: {dt_string}\n"
@@ -275,12 +329,13 @@ def export_pele(
         f.write(f"particles.fuel_species = {vec_to_str(df['Compound'].tolist())}\n")
         f.write(f"particles.Y_0 = {vec_to_str(df['Y_0'].tolist())}\n")
         f.write(f"particles.dep_fuel_species = {vec_to_str(dep_fuel_names)}\n")
+        if liq_prop_model.lower() == "mp":
+            f.write(f"particles.fuel_ref_temp = {ref_T} # K\n")
 
         for comp_name in fuel.compounds:
             f.write(f"\n# Properties for {comp_name} in {units.upper()}\n")
             for prop in prop_names:
                 if prop in formatted_names:
-                    value = df.loc[df["Compound"] == comp_name, prop].values[0]
                     prop_name, unit_txt = formatted_names[prop]
                     if units.lower() == "cgs":
                         unit_txt = unit_txt[1]
@@ -288,6 +343,7 @@ def export_pele(
                         unit_txt = unit_txt[0]
                     # Write the property to the file
                     if prop == "Family":
+                        value = df.loc[df["Compound"] == comp_name, prop].values[0]
                         if value == 0:
                             unit_txt = "saturated hydrocarbons"
                         elif value == 1:
@@ -299,7 +355,17 @@ def export_pele(
                         f.write(
                             f"particles.{comp_name}_{prop_name} = {value} # {unit_txt}\n"
                         )
+                    elif prop == "psat":
+                        A = df.loc[df["Compound"] == comp_name, "psat_A"].values[0]
+                        B = df.loc[df["Compound"] == comp_name, "psat_B"].values[0]
+                        C = df.loc[df["Compound"] == comp_name, "psat_C"].values[0]
+                        D = df.loc[df["Compound"] == comp_name, "psat_D"].values[0]
+                        psat_coeffs = [A, B, C, D]
+                        f.write(
+                            f"particles.{comp_name}_{prop_name} = {vec_to_str(psat_coeffs)} # {unit_txt}\n"
+                        )
                     else:
+                        value = df.loc[df["Compound"] == comp_name, prop].values[0]
                         f.write(
                             f"particles.{comp_name}_{prop_name} = {value:.6f} # {unit_txt}\n"
                         )
@@ -312,14 +378,14 @@ def main():
     :param --fuel_name: Name of the fuel (mandatory).
     :type --fuel_name: str
 
+    :param --fuel_data_dir: Directory where fuel data files are located. Default is FuelLib/fuelData.
+    :type --fuel_data_dir: str, optional
+
     :param --units: Units for critical properties. Options are "mks" (default) or "cgs".
     :type --units: str, optional
 
     :param --dep_fuel_names: Space-separated list with len(fuel.compounds) or single fuel that all compounds deposit. Default is fuel.compounds.
     :type --dep_fuel_names: str, optional
-
-    :param --max_dep_fuels: Maximum number of deposition fuels to consider. Default is 30.
-    :type --max_dep_fuels: int, optional
 
     :param --export_dir: Directory to export the properties. Default is "FuelLib/exportData".
     :type --export_dir: str, optional
@@ -329,6 +395,12 @@ def main():
 
     :param --export_mix_name: Name the mixture if different than fuel_name. Default is fuel_name.
     :type --export_mix_name: str, optional
+
+    :param --liq_prop_model: Model for liquid properties. Options are "gcm" (default) or "mp".
+    :type --liq_prop_model: str, optional
+
+    :param --psat_antoine: Use Antoine coefficients for vapor pressure in MP model (True or False). Default is True.
+    :type --psat_antoine: bool, optional
 
     :raises FileNotFoundError: If required files for the specified fuel are not found.
     """
@@ -345,6 +417,13 @@ def main():
         help="Name of the fuel (mandatory).",
     )
 
+    # Optional argument for fuel data directory
+    parser.add_argument(
+        "--fuel_data_dir",
+        default=FUELDATA_DIR,
+        help="Directory where fuel data files are located (optional, default: FuelLib/fuelData).",
+    )
+
     # Optional argument for units
     # Default is 'mks', but can be set to 'cgs'
     parser.add_argument(
@@ -359,14 +438,6 @@ def main():
         nargs="+",  # Accepts one or more values
         default=None,
         help="Space-separated list or single fuel that each compound deposits to (optional, default: fuel.compounds).",
-    )
-
-    # Optional argument for maximum number of deposition fuels
-    parser.add_argument(
-        "--max_dep_fuels",
-        type=int,
-        default=30,
-        help="Maximum number of deposition fuels to consider (optional, default: 30).",
     )
 
     # Optional argument for export directory
@@ -391,40 +462,58 @@ def main():
         help="Name the mixture if different than fuel_name (optional, default: fuel_name).",
     )
 
+    # Optional argument for liquid property model
+    parser.add_argument(
+        "--liq_prop_model",
+        default="gcm",
+        help='Model for liquid properties: "gcm" (default) or "mp" (optional, default: gcm).',
+    )
+
+    # Optional argument for printing Antoine coefficients in MP model
+    parser.add_argument(
+        "--psat_antoine",
+        type=lambda x: str(x).lower() in ["true", "1"],
+        default=True,
+        help="Use Antoine coefficients for vapor pressure in MP model (True or False, default: True).",
+    )
+
     # Parse arguments
     args = parser.parse_args()
-    print("export_mix =", args.export_mix)
     fuel_name = args.fuel_name
+    fuel_data_dir = args.fuel_data_dir
     units = args.units.lower()
     dep_fuel_names = args.dep_fuel_names
-    max_dep_fuels = args.max_dep_fuels
     export_dir = args.export_dir
     export_mix = args.export_mix
     export_mix_name = args.export_mix_name
+    liq_prop_model = args.liq_prop_model.lower()
+    psat_antoine = args.psat_antoine
 
     # Print the parsed arguments
     print(f"Preparing to export properties:")
     print(f"    Fuel name: {fuel_name}")
     print(f"    Units: {units}")
-    print(f"    Export directory: {export_dir}")
+    print(f"    Liquid property model: {liq_prop_model}")
+    if liq_prop_model.lower() == "mp":
+        print(f"    Antoine coefficients: {psat_antoine}")
     print(f"    Export mixture properties: {export_mix}")
+    print(f"    Export directory: {export_dir}")
+    print(f"    Fuel data directory: {fuel_data_dir}")
 
     # Check if necessary files exist in the fuelData directory
     print("\nChecking for required files...")
-    gcxgc_file = os.path.join(FUELDATA_GC_DIR, f"{fuel_name}_init.csv")
-    decomp_file = os.path.join(FUELDATA_DECOMP_DIR, f"{fuel_name}.csv")
+    gcxgc_file = os.path.join(fuel_data_dir, f"gcData/{fuel_name}_init.csv")
+    decomp_file = os.path.join(fuel_data_dir, f"groupDecompositionData/{fuel_name}.csv")
     if not os.path.exists(gcxgc_file):
-        raise FileNotFoundError(
-            f"GCXGC file for {fuel_name} not found in {FUELDATA_GC_DIR}. gxcgc_file = {gcxgc_file}"
-        )
+        err = f"GCXGC file for {fuel_name} not found in {fuel_data_dir}/gcData. gxcgc_file = {gcxgc_file}"
+        raise FileNotFoundError(err)
     if not os.path.exists(decomp_file):
-        raise FileNotFoundError(
-            f"Decomposition file for {fuel_name} not found in {FUELDATA_DECOMP_DIR}."
-        )
+        err = f"Decomposition file for {fuel_name} not found in {fuel_data_dir}/groupDecompositionData. decomp_file = {decomp_file}"
+        raise FileNotFoundError(err)
     print("All required files found.")
 
     # Create the groupContribution object for the specified fuel
-    fuel = fl.fuel(fuel_name)
+    fuel = fl.fuel(fuel_name, fuelDataDir=fuel_data_dir)
 
     # Export properties for Pele
     export_pele(
@@ -432,9 +521,10 @@ def main():
         path=export_dir,
         units=units,
         dep_fuel_names=dep_fuel_names,
-        max_dep_fuels=max_dep_fuels,
         export_mix=export_mix,
         export_mix_name=export_mix_name,
+        liq_prop_model=liq_prop_model,
+        psat_antoine=psat_antoine,
     )
 
     print("\nExport completed successfully!")
