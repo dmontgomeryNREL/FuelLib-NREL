@@ -31,8 +31,8 @@ FuelLib requires two input files for any given fuel, ``<fuel_name>``:
 
 These two required files must have the same number of rows and the same order of components. Many examples can be found in the `fuelData <https://github.com/NREL/FuelLib/tree/main/fuelData>`_ directory.
 
-Decomposing Fuel Components into GCM Groups
-"""""""""""""""""""""""""""""""""""""""""""
+Decomposing Fuel Components into Fundamental Groups
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The decomposition process is a manual process that requires knowledge of the chemical structure of each component in the fuel. 
 For example, consider a multicomponent fuel consisting of heptane (C7H16), decane (C10H22), and (1,5-dimethylhexyl)cyclohexane (C14H28).
@@ -51,6 +51,7 @@ are accounted for using the second order groups defined in the `gcmTable`_. Howe
 the remaining branch with a single CH3 group bonded to a CH2 group is not defined in the `gcmTable`_.
 
 .. table::
+    :align: center
 
     +--------------------------------+-------+-------+-------+-----+----------+-----------------+
     | Compound                       | CH3   | CH2   | CH    | ... | (CH3)2CH | 6 membered ring |
@@ -61,8 +62,6 @@ the remaining branch with a single CH3 group bonded to a CH2 group is not define
     +--------------------------------+-------+-------+-------+-----+----------+-----------------+
     | (1,5-dimethylhexyl)cyclohexane | 3     | 8     | 3     | ... | 1        | 1               |
     +--------------------------------+-------+-------+-------+-----+----------+-----------------+
-
-
 
 Basic Usage
 ^^^^^^^^^^^

@@ -1,3 +1,5 @@
+.. _sec-exporting-to-pelephysics:
+
 Exporting Properties for Pele
 -----------------------------
 
@@ -118,6 +120,7 @@ There are many additional options that can be specified when running the export 
 - ``--fuel_data_dir``: Specify the directory containing the fuel data files. The default is ``"FuelLib/fuelData"``.
 - ``--units``: Specify the units for the properties. The default is "mks" but users can set the units to "cgs" for use in PeleC.
 - ``--dep_fuel_names``: Specify which gas-phase species the liquid fuel deposits. The default is the same as the fuel name, but users can specify a single gas-phase species or a list of gas-phase species.
+- ``--use_pp_keys``: Use the PelePhysics key for each compound (True or False). The default is True if keys are available.
 - ``--export_dir``: Specify the directory to export the file. The default is "FuelLib/exportData".
 - ``--export_mix``: Export the fuel as a single mixture species. The default is 0 or False.
 - ``--export_mix_name``: Specify the name of the mixture species if ``--export_mix`` is set to True. The default is the same as the fuel name.

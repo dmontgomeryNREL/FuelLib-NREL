@@ -86,6 +86,12 @@ class fuel:
         self.compounds = [
             compound.strip() for compound in df_gcxgc["Compound"].to_list()
         ]
+        if "PelePhysics Key" in df_gcxgc.columns:
+            self.pelephysics_keys = [
+                key.strip() for key in df_gcxgc["PelePhysics Key"].to_list()
+            ]
+        else:
+            self.pelephysics_keys = None
 
         self.Y_0 = df_gcxgc["Weight %"].to_numpy().flatten().astype(float)
         self.Y_0 /= np.sum(self.Y_0)
