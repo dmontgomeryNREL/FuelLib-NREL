@@ -514,6 +514,25 @@ Vredeveld as described in Poling\ :footcite:p:`poling_properties_2001`:
 .. math::
    \lambda = \bigg(\sum_{i=1}^{N_c} Y_i \lambda_i^{-2} \bigg)^{-1/2}.
 
+Reference Compounds for Jet Fuels
+---------------------------------
+
+It is difficult to identify individual components of complex multicomponent jet fuels using GCxGC analysis, 
+which generally provides weight percentages of a given hydrocarbon family and carbon number within a sample (e.g., 5% C10 iso-alkane, 2% C13 cycloalkane, etc.).
+To address this challenge, FuelLib uses a set of reference compounds that represent the major hydrocarbon families and carbon numbers found in jet fuels.
+A comprehensive list of the reference compounds used in FuelLib can be found in the 
+`fuelData/refCompounds.csv <https://github.com/NREL/FuelLib/blob/main/fuelData/refCompounds.csv>`_ file, 
+with associated functional group decompositions in `fuelData/groupDecompositionData/refCompounds.csv <https://github.com/NREL/FuelLib/blob/main/fuelData/groupDecompositionData/refCompounds.csv>`_.
+
+For ease of reference, the reference compounds and keys corresponding to a PelePhysics mechanism `fuellib_posf_nonreacting <https://github.com/AMReX-Combustion/PelePhysics/tree/development/Mechanisms/fuellib_posf_nonreacting>`_ are provided in the table below.
+When provided, the PelePhysics keys can be used to link the compounds in FuelLib to species in PelePhysics simulations via ``Export4Pele.py`` as described in :ref:`Exporting to PelePhysics <sec-exporting-to-pelephysics>`.
+
+.. csv-table:: Reference compounds, chemical formulas, and corresponding PelePhysics keys by GCxGC bin.
+   :file: ../fuelData/refCompounds.csv
+   :header-rows: 1
+   :align: center
+   :widths: auto
+
 Validation
 ----------
 
@@ -526,7 +545,7 @@ Single Component Fuels
    
    Properties of heptane, decane, and dodecane against predictive data from NIST Chemistry WebBook.
 
-Multi-Component Fuels
+Multicomponent Fuels
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. figure:: /figures/multiCompFuels.png
